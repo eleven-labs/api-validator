@@ -79,12 +79,20 @@ class RequestValidator
     /**
      * Validate an array of request headers
      *
-     * @param array $headers
+     * @param array $headers An associative array of header names and their values (see psr-7 message headers)
      * @param string $pathTemplate
      * @param string $httpMethod
      */
     public function validateHeaders(array $headers, $pathTemplate, $httpMethod)
     {
+        // transform header values into a string
+        $headers = array_map(
+            function (array $values) {
+                return implode(', ', $values);
+            },
+            $headers
+        );
+
         $schemaHeaders = $this->schema->getRequestHeadersParameters($pathTemplate, $httpMethod);
 
         $this->validateParameters(array_change_key_case($headers, CASE_LOWER), $schemaHeaders, 'header');

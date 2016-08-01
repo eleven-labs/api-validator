@@ -81,7 +81,7 @@ class RequestValidatorTest extends TestCase
         $schema->getRequestHeadersParameters('/', 'GET')->willReturn($headersInSchema);
 
         $requestValidator = new RequestValidator($schema->reveal(), $validator->reveal());
-        $requestValidator->validateHeaders(['x-foo' => 'bar'], '/', 'GET');
+        $requestValidator->validateHeaders(['x-foo' => ['bar']], '/', 'GET');
     }
 
     public function testValidateQueryParams()
