@@ -140,24 +140,24 @@ class RequestValidator
 
     private function validateParameters(array $params, array $schemaParams, $location)
     {
-        $keys = [];
+        $properties = new \stdClass;
         $required = [];
-        foreach ($schemaParams as &$schemaParam) {
-            $keys[] = $schemaParam->name;
+        foreach ($schemaParams as $schemaParam) {
             if (isset($schemaParam->required) && $schemaParam->required === true) {
                 $required[] = $schemaParam->name;
             }
+            $property = clone $schemaParam;
+            unset($property->in);
+            unset($property->name);
+            unset($property->required);
 
-            // remove unnecessary parameters
-            unset($schemaParam->in);
-            unset($schemaParam->name);
-            unset($schemaParam->required);
+            $properties->{$schemaParam->name} = $property;
         }
 
         $validationSchema = new \stdClass();
         $validationSchema->type = 'object';
         $validationSchema->required = $required;
-        $validationSchema->properties = (object) array_combine($keys, $schemaParams);
+        $validationSchema->properties = $properties;
 
         $this->validateAgainstSchema(
             (object) $params,
