@@ -109,12 +109,10 @@ class RequestValidator
     {
         parse_str($queryString, $queryParams);
 
-        if (! empty($queryParams)) {
-            $schemaQueryParams = $this->schema->getQueryParameters($pathTemplate, $httpMethod);
-            $normalizedQueryParams = $this->getNormalizedQueryParams($queryParams, $schemaQueryParams);
+        $schemaQueryParams = $this->schema->getQueryParameters($pathTemplate, $httpMethod);
+        $normalizedQueryParams = $this->getNormalizedQueryParams($queryParams, $schemaQueryParams);
 
-            $this->validateParameters($normalizedQueryParams, $schemaQueryParams, 'query');
-        }
+        $this->validateParameters($normalizedQueryParams, $schemaQueryParams, 'query');
     }
 
 
@@ -201,10 +199,14 @@ class RequestValidator
                         }
                         break;
                     case 'integer':
-                        $params[$name] = (int) $params[$name];
+                        if (is_numeric($params[$name])) {
+                            $params[$name] = (int) $params[$name];
+                        }
                         break;
                     case 'number':
-                        $params[$name] = (float) $params[$name];
+                        if (is_numeric($params[$name])) {
+                            $params[$name] = (float) $params[$name];
+                        }
                         break;
                 }
             }

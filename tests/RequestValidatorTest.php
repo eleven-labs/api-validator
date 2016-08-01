@@ -119,6 +119,40 @@ class RequestValidatorTest extends TestCase
         $requestValidator->validateQueryString('foo=1234', '/', 'GET');
     }
 
+    /**
+     * @todo This test demonstrate that the getNormalizedQueryParams() method should be isolated somewhere else
+     * @dataProvider getQueryParameters
+     */
+    public function testQueryParamsNormalization($key, $actualValue, $expectedValue)
+    {
+        $validator = $this->prophesize(Validator::class);
+        $schema = $this->prophesize(Schema::class);
+        $requestValidator = new RequestValidator($schema->reveal(), $validator->reveal());
+
+        $schemaParameters = [
+            (object) ['name' => 'an_integer', 'type' => 'integer'],
+            (object) ['name' => 'a_number', 'type' => 'number'],
+            (object) ['name' => 'a_boolean', 'type' => 'boolean'],
+        ];
+
+        $normalized = $requestValidator->getNormalizedQueryParams([$key => $actualValue], $schemaParameters);
+
+        self::assertEquals($normalized[$key], $expectedValue);
+    }
+
+    public function getQueryParameters()
+    {
+        return [
+            // description => [key, actual, expected]
+            'with an integer' => ['an_integer', '123', 123],
+            'with a number' => ['a_number', '12.15', 12.15],
+            'with true given as a string' => ['a_boolean', 'true', true],
+            'with true given as a numeric' => ['a_boolean', '1', true],
+            'with false given as a string' => ['a_boolean', 'false', false],
+            'with false given as a numeric string' => ['a_boolean', '0', false]
+        ];
+    }
+
     public function testValidateRequest()
     {
         $schema = (new SchemaLoader())->load(__DIR__.'/fixtures/petstore.json');
