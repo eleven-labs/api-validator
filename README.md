@@ -10,8 +10,8 @@ It can consume `json` and `yaml` Schema files.
 
 ```php
 <?php
-use ElevenLabs\Swagger\SchemaLoader;
-use ElevenLabs\Swagger\RequestValidator;
+use ElevenLabs\Api\Validator\SchemaLoader;
+use ElevenLabs\Api\Validator\RequestValidator;
 use Symfony\Component\Config\ConfigCache;
 use JsonSchema\Validator as JsonSchemaValidator;
 

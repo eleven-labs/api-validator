@@ -1,5 +1,5 @@
 <?php
-namespace ElevenLabs\Swagger;
+namespace ElevenLabs\Api\Validator;
 
 use PHPUnit\Framework\TestCase;
 

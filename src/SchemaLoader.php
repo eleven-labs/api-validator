@@ -1,10 +1,10 @@
 <?php
-namespace ElevenLabs\Swagger;
+namespace ElevenLabs\Api\Validator;
 
 use JsonSchema\RefResolver;
 use JsonSchema\Uri\UriResolver;
 use JsonSchema\Uri\UriRetriever;
-use ElevenLabs\Swagger\JsonSchema\Uri\YamlUriRetriever;
+use ElevenLabs\Api\Validator\JsonSchema\Uri\YamlUriRetriever;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\Resource\FileResource;
 

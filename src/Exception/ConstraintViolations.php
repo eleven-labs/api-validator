@@ -1,7 +1,7 @@
 <?php
-namespace ElevenLabs\Swagger\Exception;
+namespace ElevenLabs\Api\Validator\Exception;
 
-use ElevenLabs\Swagger\ConstraintViolation;
+use ElevenLabs\Api\Validator\ConstraintViolation;
 
 class ConstraintViolations extends \Exception
 {

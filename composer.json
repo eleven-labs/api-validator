@@ -1,5 +1,5 @@
 {
-    "name": "eleven-labs/swagger",
+    "name": "eleven-labs/api-validator",
     "description": "Validate PSR-7 Requests against an OpenAPI/Swagger2 Schema",
     "authors": [
         {
@@ -9,12 +9,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "ElevenLabs\\Swagger\\": "src/"
+            "ElevenLabs\\Api\\Validator\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ElevenLabs\\Swagger\\": "tests/"
+            "ElevenLabs\\Api\\Validator\\": "tests/"
         }
     },
     "require": {
@@ -23,6 +23,9 @@
         "symfony/config": "^2.7|^3.0",
         "justinrainbow/json-schema": "^2.0",
         "rize/uri-template": "^0.3.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.4",

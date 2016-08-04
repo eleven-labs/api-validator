@@ -1,5 +1,5 @@
 <?php
-namespace ElevenLabs\Swagger;
+namespace ElevenLabs\Api\Validator;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;

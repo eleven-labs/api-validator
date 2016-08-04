@@ -1,5 +1,5 @@
 <?php
-namespace ElevenLabs\Swagger\JsonSchema\Uri;
+namespace ElevenLabs\Api\Validator\JsonSchema\Uri;
 
 use PHPUnit\Framework\TestCase;
 

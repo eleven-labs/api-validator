@@ -1,9 +1,9 @@
 <?php
-namespace ElevenLabs\Swagger;
+namespace ElevenLabs\Api\Validator;
 
 use JsonSchema\Validator;
 use Psr\Http\Message\RequestInterface;
-use ElevenLabs\Swagger\Exception\ConstraintViolations;
+use ElevenLabs\Api\Validator\Exception\ConstraintViolations;
 
 /**
  * Validate a Request against the API Specification
