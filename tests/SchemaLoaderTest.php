@@ -38,7 +38,11 @@ class SchemaLoaderTest extends TestCase
         $cachedSchema = (new SchemaLoader($cache->reveal()))->load($filename);
         $uncachedSchema = (new SchemaLoader())->load($filename);
 
-        self::assertEquals($uncachedSchema, $cachedSchema);
+        // We do not want to compare the id (absolute path to the file used to load the schema)
+        self::assertEquals(
+            $uncachedSchema->getPathTemplates(),
+            $cachedSchema->getPathTemplates()
+        );
     }
 
     public function testLoadCacheWrite()
