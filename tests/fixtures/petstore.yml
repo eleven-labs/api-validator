@@ -27,9 +27,6 @@ paths:
     get:
       description: Returns all food from the system that the user has access to
       operationId: findFood
-      externalDocs:
-        description: This is an example of request without parameters
-        url: https://swagger.io/about
       produces:
       - application/json
       responses:

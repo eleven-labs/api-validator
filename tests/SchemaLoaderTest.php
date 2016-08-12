@@ -27,15 +27,18 @@ class SchemaLoaderTest extends TestCase
         ];
     }
 
-    public function testLoadFromCache()
+    public function testCachedSchemaShouldEqualUncachedSchema()
     {
+        $filename = __DIR__.'/fixtures/petstore.json';
+
         $cache = $this->prophesize(ConfigCacheInterface::class);
         $cache->isFresh()->shouldBeCalledTimes(1)->willReturn(true);
-        $cache->getPath()->shouldBeCalledTimes(1)->willReturn(__DIR__.'/fixtures/petstore.php');
+        $cache->getPath()->shouldBeCalledTimes(1)->willReturn(__DIR__.'/fixtures/petstore.cached');
 
-        $loader = new SchemaLoader($cache->reveal());
+        $cachedSchema = (new SchemaLoader($cache->reveal()))->load($filename);
+        $uncachedSchema = (new SchemaLoader())->load($filename);
 
-        self::assertInternalType('object', $loader->load(__DIR__.'/fixtures/petstore.json'));
+        self::assertEquals($uncachedSchema, $cachedSchema);
     }
 
     public function testLoadCacheWrite()
@@ -58,7 +61,7 @@ class SchemaLoaderTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('file "'.$filename.'" does not provide a supported extension choose either json, yml or yaml');
 
-        (new SchemaLoader())->load(__DIR__.'/fixtures/petstore.txt');
+         (new SchemaLoader())->load(__DIR__.'/fixtures/petstore.txt');
     }
 
 }

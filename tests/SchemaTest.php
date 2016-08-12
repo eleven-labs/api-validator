@@ -166,6 +166,22 @@ class SchemaTest extends TestCase
         self::assertEquals($expectedParameters, json_encode($parameters));
     }
 
+    public function testItCanFindAnOperationFromItsId()
+    {
+        $operation = $this->schema->findDefinitionByOperationId('addPet');
+
+        self::assertSame('post', $operation->method);
+        self::assertSame('/api/pets', $operation->pattern);
+    }
+
+    public function testItThrowAnExceptionWhenAnOperationCannotBeFound()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to find operation "unknown"');
+
+        $this->schema->findDefinitionByOperationId('unknown');
+    }
+
     public function requestBodyParameters()
     {
         $parameters = '{"type":"object","allOf":[{"type":"object","required":["id","name"],"externalDocs":{"description":"find more info here","url":"https:\/\/swagger.io\/about"},"properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"},"tag":{"type":"string"}}},{"required":["id"],"properties":{"id":{"type":"integer","format":"int64"}}}]}';

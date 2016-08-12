@@ -49,12 +49,12 @@ class SchemaLoader
         if ($this->cache->isFresh() === false) {
             $schemaObject = $this->loadSchemaObject($schemaFile);
             $this->cache->write(
-                "<?php\n return unserialize('".serialize($schemaObject)."');",
+                serialize($schemaObject),
                 [new FileResource($schemaFile)]
             );
 
         } else {
-            $schemaObject = require $this->cache->getPath();
+            $schemaObject = unserialize(file_get_contents($this->cache->getPath()));
         }
 
         return $schemaObject;
