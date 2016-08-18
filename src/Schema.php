@@ -7,11 +7,6 @@ use stdClass;
 
 /**
  * Expose methods to navigate across the Swagger definition schema.
- *
- * Stolen form the https://github.com/Maks3w/SwaggerAssertions awesome library
- * I didn't wanted that PHPUnit dependency
- *
- * @todo We may need to create an interface in order to implement others API definition specifications
  */
 class Schema
 {
@@ -50,6 +45,21 @@ class Schema
         $method = $this->getPath($pathSegments($path, $method));
 
         return $method;
+    }
+
+    /**
+     * Access swagger properties using a path
+     * It support the dotted notation
+     *
+     * @param string $path (examples: info.contact.email)
+     *
+     * @return mixed
+     */
+    public function get($path)
+    {
+        $pathSegments = explode('.', $path);
+
+        return $this->getPath($pathSegments);
     }
 
     /**

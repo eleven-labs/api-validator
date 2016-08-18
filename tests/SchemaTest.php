@@ -194,4 +194,16 @@ class SchemaTest extends TestCase
 
         return $dataSet;
     }
+
+    public function testItCanAccessSwaggerProperties()
+    {
+        $expected = ['application/json'];
+        self::assertSame($expected, $this->schema->get('consumes'));
+    }
+
+    public function testItCanAccessSwaggerPropertiesUsingDottedNotation()
+    {
+        $expected  ='apiteam@swagger.io';
+        self::assertSame($expected, $this->schema->get('info.contact.email'));
+    }
 }
