@@ -1,5 +1,5 @@
 <?php
-namespace ElevenLabs\Api\Validator\JsonSchema\Uri;
+namespace ElevenLabs\Api\JsonSchema\Uri;
 
 use PHPUnit\Framework\TestCase;
 
@@ -10,6 +10,6 @@ class YamlUriRetrieverTest extends TestCase
         $retriever = new YamlUriRetriever();
         $object = $retriever->retrieve('file://'.__DIR__.'/../../fixtures/petstore.yml');
 
-        self::assertInternalType('object', $object);
+        assertThat($object, isType('object'));
     }
 }

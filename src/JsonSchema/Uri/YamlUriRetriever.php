@@ -1,5 +1,5 @@
 <?php
-namespace ElevenLabs\Api\Validator\JsonSchema\Uri;
+namespace ElevenLabs\Api\JsonSchema\Uri;
 
 use JsonSchema\Uri\UriRetriever;
 use Symfony\Component\Yaml\Yaml;
@@ -24,10 +24,6 @@ class YamlUriRetriever extends UriRetriever
         $contents = $this->getUriRetriever()->retrieve($fetchUri);
 
         $contents = Yaml::parse($contents);
-        if (isset($contents['info']['description'])) {
-            unset($contents['info']['description']);
-        }
-
         $jsonSchema = json_decode(json_encode($contents));
 
         $this->schemaCache[$fetchUri] = $jsonSchema;
