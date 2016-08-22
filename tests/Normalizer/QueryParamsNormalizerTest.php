@@ -66,10 +66,31 @@ class QueryParamsNormalizerTest extends TestCase
     public function getValidCollectionFormat()
     {
         return [
-          'with csv' => ['csv', 'foo,bar,baz', ['foo','bar','baz']],
-          'with ssv' => ['ssv', 'foo bar baz', ['foo','bar','baz']],
-          'with pipes' => ['pipes', 'foo|bar|baz', ['foo','bar','baz']],
+            'with csv' => ['csv', 'foo,bar,baz', ['foo','bar','baz']],
+            'with ssv' => ['ssv', 'foo bar baz', ['foo','bar','baz']],
+            'with pipes' => ['pipes', 'foo|bar|baz', ['foo','bar','baz']],
+            'with tabs' => ['tsv', "foo\tbar\tbaz", ['foo','bar','baz']]
         ];
+    }
+
+    /** @test */
+    public function itThrowAnExceptionOnUnsupportedCollectionFormat()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('unknown is not a supported query collection format');
+
+        $jsonSchema = $this->toObject([
+            'type' => 'object',
+            'properties' => [
+                'param' => [
+                    'type' => 'array',
+                    'items' => ['string'],
+                    'collectionFormat' => 'unknown'
+                ]
+            ]
+        ]);
+
+        QueryParamsNormalizer::normalize(['param' => 'foo%bar'], $jsonSchema);
     }
 
     private function toObject(array $array)

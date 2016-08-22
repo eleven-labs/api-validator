@@ -46,15 +46,27 @@ class QueryParamsNormalizer
                 if (isset($queryParamSchema->collectionFormat)) {
                     switch ($queryParamSchema->collectionFormat) {
                         case 'csv':
-                            $queryParams[$name] = explode(',', $queryParams[$name]);
+                            $separator = ',';
                             break;
                         case 'ssv':
-                            $queryParams[$name] = explode(' ', $queryParams[$name]);
+                            $separator = ' ';
                             break;
                         case 'pipes':
-                            $queryParams[$name] = explode('|', $queryParams[$name]);
+                            $separator = '|';
                             break;
+                        case 'tsv':
+                            $separator = "\t";
+                            break;
+                        default:
+                            throw new \InvalidArgumentException(
+                                sprintf(
+                                    '%s is not a supported query collection format',
+                                    $queryParamSchema->collectionFormat
+                                )
+                            );
                     }
+
+                    $queryParams[$name] = explode($separator, $queryParams[$name]);
                 }
             }
         }
