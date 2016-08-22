@@ -16,6 +16,6 @@ class ConstraintViolationTest extends TestCase
 
         $violation = new ConstraintViolation('property_one', 'a violation message', 'required', 'query');
 
-        self::assertEquals($expectedArray, $violation->toArray());
+        assertEquals($expectedArray, $violation->toArray());
     }
 }

@@ -1,403 +1,122 @@
 <?php
-namespace ElevenLabs\Api\Validator;
+namespace ElevenLabs\Api;
 
-use InvalidArgumentException;
-use Rize\UriTemplate\UriTemplate;
-use stdClass;
+use ElevenLabs\Api\Definition\RequestDefinition;
+use ElevenLabs\Api\Definition\RequestDefinitions;
+use Rize\UriTemplate;
 
-/**
- * Expose methods to navigate across the Swagger definition schema.
- */
-class Schema
+class Schema implements \Serializable
 {
-    /**
-     * Swagger definition.
-     *
-     * @var stdClass
-     */
-    protected $definition;
+    /** @var RequestDefinitions */
+    private $requestDefinitions = [];
+
+    /** @var string */
+    private $host;
+
+    /** @var string */
+    private $basePath;
+
+    /** @var array */
+    private $schemes;
 
     /**
-     * @param object $definition Swagger 2 definition with all their references resolved.
+     * @param RequestDefinitions $requestDefinitions
+     * @param string $basePath
+     * @param string $host
+     * @param array $schemes
      */
-    public function __construct($definition)
+    public function __construct(RequestDefinitions $requestDefinitions, $basePath = '', $host = null, array $schemes = ['http'])
     {
-        $this->definition = $definition;
-    }
-
-    /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return stdClass
-     */
-    public function getMethod($path, $method)
-    {
-        $method = strtolower($method);
-        $pathSegments = function ($path, $method) {
-            return [
-                'paths',
-                $path,
-                $method,
-            ];
-        };
-
-        $method = $this->getPath($pathSegments($path, $method));
-
-        return $method;
-    }
-
-    /**
-     * Access swagger properties using a path
-     * It support the dotted notation
-     *
-     * @param string $path (examples: info.contact.email)
-     *
-     * @return mixed
-     */
-    public function get($path)
-    {
-        $pathSegments = explode('.', $path);
-
-        return $this->getPath($pathSegments);
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getPathTemplates()
-    {
-        return array_keys((array) $this->definition->paths);
-    }
-
-    /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     * @param string $httpCode
-     *
-     * @return stdClass
-     */
-    public function getResponseSchema($path, $method, $httpCode)
-    {
-        $response = $this->getResponse($path, $method, $httpCode);
-        if (!isset($response->schema)) {
-            return new stdClass();
+        foreach ($requestDefinitions as $request) {
+            $this->addRequestDefinition($request);
         }
-
-        return $response->schema;
-    }
-
-    public function findDefinitionByOperationId($operationId)
-    {
-        $basePath = isset($this->definition->basePath) ? $this->definition->basePath : '';
-        foreach ($this->definition->paths as $pattern => $path) {
-            foreach ($path as $method => $definition) {
-                if (isset($definition->operationId) && $definition->operationId === $operationId) {
-                    $definition->method = $method;
-                    $definition->pattern = $basePath.$pattern;
-                    return $definition;
-                }
-            }
-        }
-
-        throw new \InvalidArgumentException(sprintf('Unable to find operation "%s"', $operationId));
+        $this->host = $host;
+        $this->basePath = $basePath;
+        $this->schemes = $schemes;
     }
 
     /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     * @param string $httpCode
+     * Find the operationId associated to a given path and method
      *
-     * @return stdClass[]
+     * @todo Implement a less expensive finder
+     * @param string $method An HTTP method
+     * @param string $path A path (ex: /foo/1)
+     *
+     * @return string The operationId
      */
-    public function getResponseHeaders($path, $method, $httpCode)
-    {
-        $response = $this->getResponse($path, $method, $httpCode);
-        if (!isset($response->headers)) {
-            return [];
-        }
-
-        $headers = $response->headers;
-
-        return $headers;
-    }
-
-    /**
-     * Get the response media types for the given API operation.
-     *
-     * If response does not have specific media types then inherit from global API media types.
-     *
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return string[]
-     */
-    public function getResponseMediaTypes($path, $method)
-    {
-        $method = strtolower($method);
-        $responseMediaTypes = [
-            'paths',
-            $path,
-            $method,
-            'produces',
-        ];
-
-        if ($this->hasPath($responseMediaTypes)) {
-            $mediaTypes = $this->getPath($responseMediaTypes);
-        } else {
-            $mediaTypes = $this->getPath(['produces']);
-        }
-
-        return $mediaTypes;
-    }
-
-    /**
-     * @param string[] $segments
-     *
-     * @return bool If path exists.
-     */
-    public function hasPath(array $segments)
-    {
-        $result = $this->definition;
-        foreach ($segments as $segment) {
-            if (!isset($result->$segment)) {
-                return false;
-            }
-
-            $result = $result->$segment;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param string $requestPath percent-encoded path used on the request.
-     * @param string $path Output variable. matched path
-     * @param array $params Output variable. path parameters
-     *
-     * @return bool
-     */
-    public function findPathInTemplates($requestPath, &$path, &$params = [])
+    public function findOperationId($method, $path)
     {
         $uriTemplateManager = new UriTemplate();
-        foreach ($this->getPathTemplates() as $template) {
-            if (isset($this->definition->basePath)) {
-                $fullTemplate = $this->definition->basePath . $template;
-            } else {
-                $fullTemplate = $template;
+        foreach ($this->requestDefinitions as $requestDefinition) {
+
+            if ($requestDefinition->getMethod() !== $method) {
+                continue;
             }
 
-            $params = $uriTemplateManager->extract($fullTemplate, $requestPath, true);
+            $pathTemplate = $this->basePath . $requestDefinition->getPathTemplate();
+            $params = $uriTemplateManager->extract($pathTemplate, $path, true);
             if ($params !== null) {
-                $path = $template;
-
-                // Swagger don't follow RFC6570 so array parameters must be treated like a single string argument.
-                array_walk($params, function (&$param) {
-                    if (is_array($param)) {
-                        $param = implode(',', $param);
-                    }
-                });
-
-                return true;
+                return $requestDefinition->getOperationId();
             }
         }
 
-        return false;
+        throw new \InvalidArgumentException('Unable to resolve the operationId for path ' . $path);
+    }
+
+    public function getRequestDefinition($operationId)
+    {
+        if (!isset($this->requestDefinitions[$operationId])) {
+            throw new \InvalidArgumentException('Unable to get the request definition for '.$operationId);
+        }
+
+        return $this->requestDefinitions[$operationId];
     }
 
     /**
-     * @param string[] $segments
-     *
-     * @return mixed Path contents
-     *
-     * @throws InvalidArgumentException If path does not exists.
+     * @return string
      */
-    protected function getPath(array $segments)
+    public function getHost()
     {
-        $result = $this->definition;
-
-        foreach ($segments as $segment) {
-            if (!isset($result->$segment)) {
-                // @codeCoverageIgnoreStart
-                throw new InvalidArgumentException('Missing ' . $segment);
-                // @codeCoverageIgnoreEnd
-            }
-
-            $result = $result->$segment;
-        }
-
-        return $result;
+        return $this->host;
     }
 
     /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     * @param int $httpCode
-     *
-     * @return stdClass
+     * @return string
      */
-    public function getResponse($path, $method, $httpCode)
+    public function getBasePath()
     {
-        $method = strtolower($method);
-        $pathSegments = function ($path, $method, $httpCode) {
-            return [
-                'paths',
-                $path,
-                $method,
-                'responses',
-                $httpCode,
-            ];
-        };
-
-        if ($this->hasPath($pathSegments($path, $method, $httpCode))) {
-            $response = $this->getPath($pathSegments($path, $method, $httpCode));
-        } else {
-            $response = $this->getPath($pathSegments($path, $method, 'default'));
-        }
-
-        return $response;
+        return $this->basePath;
     }
 
     /**
-     * Get the request media types for the given API operation.
-     *
-     * If request does not have specific media types then inherit from global API media types.
-     *
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return string[]
+     * @return array
      */
-    public function getRequestMediaTypes($path, $method)
+    public function getSchemes()
     {
-        $method = strtolower($method);
-        $mediaTypesPath = [
-            'paths',
-            $path,
-            $method,
-            'consumes',
-        ];
-
-        if ($this->hasPath($mediaTypesPath)) {
-            $mediaTypes = $this->getPath($mediaTypesPath);
-        } else {
-            $mediaTypes = $this->getPath(['consumes']);
-        }
-
-        return $mediaTypes;
+        return $this->schemes;
     }
 
-    /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return stdClass[]
-     */
-    public function getRequestHeadersParameters($path, $method)
+    public function serialize()
     {
-        $parameters = $this->getRequestParameters($path, $method);
-        $parameters = $this->filterParametersObjectByLocation($parameters, 'header');
-        if (empty($parameters)) {
-            return [];
-        }
-
-        return $parameters;
+        return serialize([
+            'host' => $this->host,
+            'basePath' => $this->basePath,
+            'schemes' => $this->schemes,
+            'requests' => $this->requestDefinitions
+        ]);
     }
 
-    /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return array|\stdClass[]
-     */
-    public function getQueryParameters($path, $method)
+    public function unserialize($serialized)
     {
-        $parameters = $this->getRequestParameters($path, $method);
-        $parameters = $this->filterParametersObjectByLocation($parameters, 'query');
-        if (empty($parameters)) {
-            return [];
-        }
-
-        return $parameters;
+        $data = unserialize($serialized);
+        $this->host = $data['host'];
+        $this->basePath = $data['basePath'];
+        $this->schemes = $data['schemes'];
+        $this->requestDefinitions = $data['requests'];
     }
 
-    public function getRequestUriParams($path, $method)
+    private function addRequestDefinition(RequestDefinition $request)
     {
-        $parameters = $this->getRequestParameters($path, $method);
-        $parameters = $this->filterParametersObjectByLocation($parameters, 'path');
-        if (empty($parameters)) {
-            return [];
-        }
-
-        return $parameters;
-    }
-
-    /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return stdClass
-     */
-    public function getRequestSchema($path, $method)
-    {
-        $parameters = $this->getRequestParameters($path, $method);
-        $parameters = $this->filterParametersObjectByLocation($parameters, 'body');
-        switch (count($parameters)) {
-            case 0:
-                return new stdClass();
-            case 1:
-                break;
-            default:
-                // @codeCoverageIgnoreStart
-                throw new \DomainException('Too many body parameters. Only one is allowed');
-                // @codeCoverageIgnoreEnd
-        }
-
-        $parameter = $parameters[0];
-        if (!isset($parameter->schema)) {
-            // @codeCoverageIgnoreStart
-            throw new \DomainException('schema property is required for body parameter');
-            // @codeCoverageIgnoreEnd
-        }
-
-        return $parameter->schema;
-    }
-
-    /**
-     * @param string $path Swagger path template.
-     * @param string $method
-     *
-     * @return stdClass[]
-     */
-    public function getRequestParameters($path, $method)
-    {
-        $method = $this->getMethod($path, $method);
-        if (!isset($method->parameters)) {
-            return [];
-        }
-
-        return $method->parameters;
-    }
-
-    /**
-     * @param stdClass[] $parameters
-     * @param string $location
-     *
-     * @return \stdClass[]
-     */
-    public function filterParametersObjectByLocation(array $parameters, $location)
-    {
-        return array_values(array_filter(
-            $parameters,
-            function ($parameter) use ($location) {
-                if (!isset($parameter->in)) {
-                    // @codeCoverageIgnoreStart
-                    throw new InvalidArgumentException('Missing "in" field in Parameter Object');
-                    // @codeCoverageIgnoreEnd
-                }
-
-                return ($parameter->in === $location);
-            }
-        ));
+        $this->requestDefinitions[$request->getOperationId()] = $request;
     }
 }
