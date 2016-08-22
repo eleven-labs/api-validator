@@ -44,7 +44,7 @@ class SwaggerSchemaFactory implements SchemaFactory
      *
      * @return object
      */
-    private function resolveSchemaFile($schemaFile)
+    protected function resolveSchemaFile($schemaFile)
     {
         $extension = pathinfo($schemaFile, PATHINFO_EXTENSION);
         switch ($extension) {
@@ -81,7 +81,7 @@ class SwaggerSchemaFactory implements SchemaFactory
      * @param \stdClass $schema
      * @return RequestDefinitions
      */
-    private function createRequestDefinitions(\stdClass $schema)
+    protected function createRequestDefinitions(\stdClass $schema)
     {
         $definitions = [];
         $defaultConsumedContentTypes = [];
@@ -164,7 +164,7 @@ class SwaggerSchemaFactory implements SchemaFactory
         return new RequestDefinitions($definitions);
     }
 
-    private function createResponseDefinition($statusCode, array $defaultProducedContentTypes, \stdClass $response)
+    protected function createResponseDefinition($statusCode, array $defaultProducedContentTypes, \stdClass $response)
     {
         $schema = null;
         $contentTypes = $defaultProducedContentTypes;
@@ -185,7 +185,7 @@ class SwaggerSchemaFactory implements SchemaFactory
      *
      * @return RequestParameter
      */
-    private function createRequestParameter(\stdClass $parameter)
+    protected function createRequestParameter(\stdClass $parameter)
     {
         $parameter = get_object_vars($parameter);
         $location = $parameter['in'];
