@@ -138,7 +138,7 @@ class RequestValidator
         }
     }
 
-    public function hasViolation()
+    public function hasViolations()
     {
         return (!empty($this->violations));
     }

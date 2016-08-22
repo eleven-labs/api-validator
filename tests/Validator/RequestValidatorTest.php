@@ -40,7 +40,7 @@ class RequestValidatorTest extends TestCase
 
         $this->requestValidator->validateRequest($request);
 
-        assertThat($this->requestValidator->hasViolation(), isTrue());
+        assertThat($this->requestValidator->hasViolations(), isTrue());
         assertThat($this->requestValidator->getViolations(), containsOnlyInstancesOf(ConstraintViolation::class));
         assertThat($this->requestValidator->getViolations(), equalTo($expectedViolations));
     }
@@ -65,7 +65,7 @@ class RequestValidatorTest extends TestCase
 
         $this->requestValidator->validateRequest($request);
 
-        assertThat($this->requestValidator->hasViolation(), isTrue());
+        assertThat($this->requestValidator->hasViolations(), isTrue());
         assertThat($this->requestValidator->getViolations(), containsOnlyInstancesOf(ConstraintViolation::class));
         assertThat($this->requestValidator->getViolations(), equalTo($expectedViolations));
     }
@@ -91,7 +91,7 @@ class RequestValidatorTest extends TestCase
 
         $this->requestValidator->validateRequest($request);
 
-        assertThat($this->requestValidator->hasViolation(), isTrue());
+        assertThat($this->requestValidator->hasViolations(), isTrue());
         assertThat($this->requestValidator->getViolations(), containsOnlyInstancesOf(ConstraintViolation::class));
         assertThat($this->requestValidator->getViolations(), equalTo($expectedViolation));
     }
@@ -114,7 +114,7 @@ class RequestValidatorTest extends TestCase
 
         $this->requestValidator->validateRequest($request);
 
-        assertThat($this->requestValidator->hasViolation(), isTrue());
+        assertThat($this->requestValidator->hasViolations(), isTrue());
         assertThat($this->requestValidator->getViolations(), containsOnlyInstancesOf(ConstraintViolation::class));
         assertThat($this->requestValidator->getViolations(), equalTo($expectedViolation));
     }
@@ -139,7 +139,7 @@ class RequestValidatorTest extends TestCase
 
         $this->requestValidator->validateRequest($request);
 
-        assertThat($this->requestValidator->hasViolation(), isTrue());
+        assertThat($this->requestValidator->hasViolations(), isTrue());
         assertThat($this->requestValidator->getViolations(), containsOnlyInstancesOf(ConstraintViolation::class));
         assertThat($this->requestValidator->getViolations(), equalTo($expectedViolation));
     }
