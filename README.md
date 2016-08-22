@@ -13,7 +13,7 @@ and [API Elements (API Blueprint)](https://github.com/apiaryio/api-elements) in 
 ## Dependencies
 
 We rely on the [justinrainbow/json-schema](https://github.com/justinrainbow/json-schema) library 
-to parse specification files and to validate request's `headers`, `query`, `uri` and `body` parts.
+to parse specification files and validate request's `headers`, `query`, `uri` and `body` parts.
 
 ## Usage
 
@@ -78,7 +78,7 @@ if ($requestValidator->hasViolations()) {
 
 ### Working with Symfony HTTPFoundation Requests
 
-You will need an adapter in order to valide symfony request.
+You will need an adapter in order to validate symfony requests.
 
 We recommend you to use the [symfony/psr-http-message-bridge](https://github.com/symfony/psr-http-message-bridge)
 
