@@ -1,27 +1,12 @@
 <?php
 namespace ElevenLabs\Api\Definition;
 
-class RequestParameters implements \Serializable
+class RequestParameters implements \Serializable, \IteratorAggregate
 {
     /**
      * @var RequestParameter[]
      */
-    private $path;
-
-    /**
-     * @var RequestParameter[]
-     */
-    private $query;
-
-    /**
-     * @var RequestParameter[]
-     */
-    private $headers;
-
-    /**
-     * @var RequestParameter
-     */
-    private $body;
+    private $parameters;
 
     public function __construct(array $parameters)
     {
@@ -30,15 +15,21 @@ class RequestParameters implements \Serializable
         }
     }
 
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->parameters);
+    }
+
     /**
      * JSON Schema for a the body
      *
-     * @return null|\stdClass
+     * @return \stdClass|null
      */
     public function getBodySchema()
     {
-        if ($this->body !== null && $this->body->hasSchema()) {
-            return $this->body->getSchema();
+        $body = $this->getBody();
+        if ($body !== null && $body->hasSchema()) {
+            return $body->getSchema();
         }
 
         return null;
@@ -51,11 +42,7 @@ class RequestParameters implements \Serializable
      */
     public function getQuerySchema()
     {
-        if ($this->query !== null) {
-            return $this->getSchema($this->query);
-        }
-
-        return null;
+        return $this->getSchema($this->getQuery());
     }
 
     /**
@@ -65,11 +52,7 @@ class RequestParameters implements \Serializable
      */
     public function getHeadersSchema()
     {
-        if ($this->headers !== null) {
-            return $this->getSchema($this->headers);
-        }
-
-        return null;
+        return $this->getSchema($this->getHeaders());
     }
 
     /**
@@ -77,7 +60,7 @@ class RequestParameters implements \Serializable
      */
     public function getPath()
     {
-        return $this->path;
+        return $this->findByLocation('path');
     }
 
     /**
@@ -85,7 +68,7 @@ class RequestParameters implements \Serializable
      */
     public function getQuery()
     {
-        return $this->query;
+        return $this->findByLocation('query');
     }
 
     /**
@@ -93,24 +76,48 @@ class RequestParameters implements \Serializable
      */
     public function getHeaders()
     {
-        return $this->headers;
+        return $this->findByLocation('header');
     }
 
     /**
-     * @return RequestParameter
+     * @return RequestParameter|null
      */
     public function getBody()
     {
-        return $this->body;
+        $match = $this->findByLocation('body');
+        if (empty($match)) {
+            return null;
+        }
+
+        return current($match);
+    }
+
+    /**
+     * Get one request parameter by name
+     *
+     * @param string $name
+     * @return RequestParameter|null
+     */
+    public function getByName($name)
+    {
+        if (! isset($this->parameters[$name])) {
+            return null;
+        }
+
+        return $this->parameters[$name];
     }
 
     /**
      * @param RequestParameter[] $parameters
      *
-     * @return \stdClass
+     * @return \stdClass|null
      */
     private function getSchema(array $parameters)
     {
+        if (empty($parameters)) {
+            return null;
+        }
+
         $schema = new \stdClass();
         $schema->type = 'object';
         $schema->required = [];
@@ -127,50 +134,34 @@ class RequestParameters implements \Serializable
 
     public function serialize()
     {
-        return serialize([
-            'path' => $this->path,
-            'query' => $this->query,
-            'headers' => $this->headers,
-            'body' => $this->body
-        ]);
+        return serialize(['parameters' => $this->parameters]);
     }
 
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
-        $this->path = $data['path'];
-        $this->query = $data['query'];
-        $this->headers = $data['headers'];
-        $this->body = $data['body'];
+        $this->parameters = $data['parameters'];
     }
 
-    protected function addParameter(RequestParameter $parameter)
+    private function findByLocation($location)
     {
-        switch($parameter->getLocation()) {
-            case 'path':
-                $this->path[$parameter->getName()] = $parameter;
-                break;
-            case 'header':
-                $this->headers[$parameter->getName()] = $parameter;
-                break;
-            case 'query':
-                $this->query[$parameter->getName()] = $parameter;
-                break;
-            case 'body':
-                if ($this->body !== null) {
-                    throw new \LogicException(
-                        sprintf(
-                            'Cannot process the "%s" body parameter, You already have specified a "%s" body parameter',
-                            $parameter->getName(),
-                            $this->body->getName()
-                        )
-                    );
-                }
-                $this->body = $parameter;
-                break;
-            default:
-                throw new \InvalidArgumentException($parameter->getLocation(). ' is not a valid parameter location');
-                break;
+        return array_filter(
+            $this->parameters,
+            function (RequestParameter $parameter) use ($location) {
+                return $parameter->getLocation() === $location;
+            }
+        );
+    }
+
+    private function addParameter(RequestParameter $parameter)
+    {
+        $validLocations = ['path', 'header', 'query', 'body'];
+        if (!in_array($parameter->getLocation(), $validLocations)) {
+            throw new \InvalidArgumentException(
+                $parameter->getLocation(). ' is not a valid parameter location'
+            );
         }
+
+        $this->parameters[$parameter->getName()] = $parameter;
     }
 }

@@ -6,29 +6,25 @@ use PHPUnit\Framework\TestCase;
 class RequestParametersTest extends TestCase
 {
     /** @test */
+    public function itCanBeTraversed()
+    {
+        $requestParameter = $this->prophesize(RequestParameter::class);
+        $requestParameter->getLocation()->willReturn('query');
+        $requestParameter->getName()->willReturn('foo');
+
+        $requestParameters = new RequestParameters([$requestParameter->reveal()]);
+
+        assertThat($requestParameters, isInstanceOf(\Traversable::class));
+        assertThat($requestParameters, containsOnlyInstancesOf(RequestParameter::class));
+    }
+
+    /** @test */
     public function itCanBeSerialized()
     {
         $requestParameters = new RequestParameters([]);
         $serialized = serialize($requestParameters);
 
         assertThat(unserialize($serialized), self::equalTo($requestParameters));
-    }
-
-    /** @test */
-    public function itDoesNotAllowMultipleBodyParameters()
-    {
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Cannot process the "bar" body parameter, You already have specified a "foo" body parameter');
-
-        $firstBody = $this->prophesize(RequestParameter::class);
-        $firstBody->getName()->willreturn('foo');
-        $firstBody->getLocation()->willreturn('body');
-
-        $secondBody = $this->prophesize(RequestParameter::class);
-        $secondBody->getName()->willreturn('bar');
-        $secondBody->getLocation()->willreturn('body');
-
-        new RequestParameters([$firstBody->reveal(), $secondBody->reveal()]);
     }
 
     /** @test */
@@ -42,5 +38,17 @@ class RequestParametersTest extends TestCase
         $param->getLocation()->willreturn('nowhere');
 
         new RequestParameters([$param->reveal()]);
+    }
+
+    /** @test */
+    public function itCanResolveARequestParameterByName()
+    {
+        $requestParameter = $this->prophesize(RequestParameter::class);
+        $requestParameter->getLocation()->willReturn('query');
+        $requestParameter->getName()->willReturn('foo');
+
+        $requestParameters = new RequestParameters([$requestParameter->reveal()]);
+
+        assertThat($requestParameters->getByName('foo'), equalTo($requestParameter->reveal()));
     }
 }
