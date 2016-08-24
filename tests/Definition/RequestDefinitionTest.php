@@ -12,7 +12,7 @@ class RequestDefinitionTest extends TestCase
             'GET',
             'getFoo',
             '/foo/{id}',
-            new RequestParameters([]),
+            new Parameters([]),
             ['application/json'],
             []
         );
@@ -31,7 +31,7 @@ class RequestDefinitionTest extends TestCase
             'GET',
             'getFoo',
             '/foo/{id}',
-            new RequestParameters([]),
+            new Parameters([]),
             ['application/json'],
             [$responseDefinition->reveal()]
         );
@@ -49,7 +49,7 @@ class RequestDefinitionTest extends TestCase
             'GET',
             'getFoo',
             '/foo/{id}',
-            new RequestParameters([]),
+            new Parameters([]),
             ['application/json'],
             []
         );

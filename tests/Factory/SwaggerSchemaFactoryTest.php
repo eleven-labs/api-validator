@@ -2,8 +2,8 @@
 namespace ElevenLabs\Api\Factory;
 
 use ElevenLabs\Api\Definition\RequestDefinition;
-use ElevenLabs\Api\Definition\RequestParameter;
-use ElevenLabs\Api\Definition\RequestParameters;
+use ElevenLabs\Api\Definition\Parameter;
+use ElevenLabs\Api\Definition\Parameters;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use ElevenLabs\Api\Schema;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +44,7 @@ class SwaggerSchemaFactoryTest extends TestCase
         assertThat($requestDefinition->getOperationId(), equalTo('findFood'));
         assertThat($requestDefinition->getContentTypes(), equalTo(['application/json']));
         assertThat($requestDefinition->getPathTemplate(), equalTo('/food'));
-        assertThat($requestDefinition->getRequestParameters(), isInstanceOf(RequestParameters::class));
+        assertThat($requestDefinition->getRequestParameters(), isInstanceOf(Parameters::class));
         assertThat($requestDefinition->getResponseDefinition(304), isInstanceOf(ResponseDefinition::class));
     }
 
@@ -57,22 +57,22 @@ class SwaggerSchemaFactoryTest extends TestCase
 
         $requestParameters = $schema->getRequestDefinition('addPet')->getRequestParameters();
 
-        assertThat($requestParameters, isInstanceOf(RequestParameters::class));
-        assertThat($requestParameters->getBody(), isInstanceOf(RequestParameter::class));
+        assertThat($requestParameters, isInstanceOf(Parameters::class));
+        assertThat($requestParameters->getBody(), isInstanceOf(Parameter::class));
         assertThat($requestParameters->getBodySchema(), isType('object'));
 
         $requestParameters = $schema->getRequestDefinition('findPetById')->getRequestParameters();
 
-        assertThat($requestParameters->getPath(), containsOnlyInstancesOf(RequestParameter::class));
+        assertThat($requestParameters->getPath(), containsOnlyInstancesOf(Parameter::class));
 
         $requestParameters = $schema->getRequestDefinition('findPets')->getRequestParameters();
 
-        assertThat($requestParameters->getQuery(), containsOnlyInstancesOf(RequestParameter::class));
-        assertThat($requestParameters->getQuerySchema(), isType('object'));
+        assertThat($requestParameters->getQuery(), containsOnlyInstancesOf(Parameter::class));
+        assertThat($requestParameters->getQueryParametersSchema(), isType('object'));
 
         $requestParameters = $schema->getRequestDefinition('updatePet')->getRequestParameters();
 
-        assertThat($requestParameters->getHeaders(), containsOnlyInstancesOf(RequestParameter::class));
+        assertThat($requestParameters->getHeaders(), containsOnlyInstancesOf(Parameter::class));
         assertThat($requestParameters->getHeadersSchema(), isType('object'));
     }
 
@@ -87,7 +87,7 @@ class SwaggerSchemaFactoryTest extends TestCase
 
         assertThat($responseDefinition, isInstanceOf(ResponseDefinition::class));
         assertThat($responseDefinition->getContentTypes(), contains('application/json'));
-        assertThat($responseDefinition->getSchema(), isType('object'));
+        assertThat($responseDefinition->getBodySchema(), isType('object'));
         assertThat($responseDefinition->getStatusCode(), equalTo(200));
     }
 }

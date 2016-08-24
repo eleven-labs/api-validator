@@ -31,6 +31,7 @@ class CachedSchemaFactoryDecoratorTest extends TestCase
             $schemaFactory->reveal()
         );
 
+        $expectedSchema = $schema->reveal();
         $actualSchema = $cachedSchema->createSchema($schemaFile);
 
         assertThat($actualSchema, isInstanceOf(Schema::class));

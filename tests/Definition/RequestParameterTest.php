@@ -8,7 +8,7 @@ class RequestParameterTest extends TestCase
     /** @test */
     public function itCanBeSerialized()
     {
-        $requestParameter = new RequestParameter('query', 'foo', true, new \stdClass());
+        $requestParameter = new Parameter('query', 'foo', true, new \stdClass());
         $serialized = serialize($requestParameter);
 
         assertThat(unserialize($serialized), self::equalTo($requestParameter));

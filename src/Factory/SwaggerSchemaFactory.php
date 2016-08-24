@@ -2,8 +2,8 @@
 namespace ElevenLabs\Api\Factory;
 
 use ElevenLabs\Api\Definition\RequestDefinition;
-use ElevenLabs\Api\Definition\RequestParameter;
-use ElevenLabs\Api\Definition\RequestParameters;
+use ElevenLabs\Api\Definition\Parameter;
+use ElevenLabs\Api\Definition\Parameters;
 use ElevenLabs\Api\Definition\RequestDefinitions;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use ElevenLabs\Api\Schema;
@@ -138,7 +138,7 @@ class SwaggerSchemaFactory implements SchemaFactory
 
                 $requestParameters = [];
                 foreach ($definition->parameters as $parameter) {
-                    $requestParameters[] = $this->createRequestParameter($parameter);
+                    $requestParameters[] = $this->createParameter($parameter);
                 }
 
                 $responseDefinitions = [];
@@ -154,7 +154,7 @@ class SwaggerSchemaFactory implements SchemaFactory
                     $method,
                     $definition->operationId,
                     $pathTemplate,
-                    new RequestParameters($requestParameters),
+                    new Parameters($requestParameters),
                     $contentTypes,
                     $responseDefinitions
                 );
@@ -167,25 +167,39 @@ class SwaggerSchemaFactory implements SchemaFactory
     protected function createResponseDefinition($statusCode, array $defaultProducedContentTypes, \stdClass $response)
     {
         $schema = null;
-        $contentTypes = $defaultProducedContentTypes;
+        $allowedContentTypes = $defaultProducedContentTypes;
+        $parameters = [];
         if (isset($response->schema)) {
-            $schema = $response->schema;
+            $parameters[] = $this->createParameter((object) [
+                'in' => 'body',
+                'name' => 'body',
+                'required' => true,
+                'schema' => $response->schema
+            ]);
+        }
+        if (isset($response->headers)) {
+            foreach ($response->headers as $headerName => $schema) {
+                $schema->in = 'header';
+                $schema->name = $headerName;
+                $schema->required = true;
+                $parameters[] = $this->createParameter($schema);
+            }
         }
         if (isset($response->produces)) {
-            $contentTypes = $defaultProducedContentTypes;
+            $allowedContentTypes = $defaultProducedContentTypes;
         }
 
-        return new ResponseDefinition($statusCode, $contentTypes, $schema);
+        return new ResponseDefinition($statusCode, $allowedContentTypes, new Parameters($parameters));
     }
 
     /**
-     * Create a Parameter from a swagger request parameter
+     * Create a Parameter from a swagger parameter
      *
      * @param \stdClass $parameter
      *
-     * @return RequestParameter
+     * @return Parameter
      */
-    protected function createRequestParameter(\stdClass $parameter)
+    protected function createParameter(\stdClass $parameter)
     {
         $parameter = get_object_vars($parameter);
         $location = $parameter['in'];
@@ -208,6 +222,6 @@ class SwaggerSchemaFactory implements SchemaFactory
             $schema = null;
         }
 
-        return new RequestParameter($location, $name, $required, $schema);
+        return new Parameter($location, $name, $required, $schema);
     }
 }

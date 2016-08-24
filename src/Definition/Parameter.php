@@ -1,7 +1,7 @@
 <?php
 namespace ElevenLabs\Api\Definition;
 
-class RequestParameter implements \Serializable
+class Parameter implements \Serializable
 {
     /**
      * Location of the parameter in the request
