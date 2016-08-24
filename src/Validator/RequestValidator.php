@@ -190,6 +190,8 @@ class RequestValidator
      *
      * @param $contentType
      *
+     * @todo Put this utility method in its own class maybe ?
+     *
      * @return mixed|string
      */
     private function extractFormatFromContentType($contentType)
