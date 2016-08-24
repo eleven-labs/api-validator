@@ -6,14 +6,17 @@ It can validate [PSR-7 Requests](http://www.php-fig.org/psr/psr-7/) against a sc
 
 It's design is heavily inspired by the OpenAPI/Swagger2.0 specifications.
 
-As of now it only support the OpenAPi/Swagger2.0 specifications but we plan to 
+As of now, it only support the OpenAPi/Swagger2.0 specifications but we plan to 
 support [RAML 1.0](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/) 
 and [API Elements (API Blueprint)](https://github.com/apiaryio/api-elements) in the future.
 
 ## Dependencies
 
 We rely on the [justinrainbow/json-schema](https://github.com/justinrainbow/json-schema) library 
-to parse specification files and validate request's `headers`, `query`, `uri` and `body` parts.
+to parse specification files and to validate requests and responses:
+
+- Request's `headers`, `query`, `uri` and `body` parts.
+- Response `headers` and `body` parts.
 
 ## Usage
 
@@ -27,22 +30,26 @@ using the [Swagger 2.0 JSONSchema](https://github.com/OAI/OpenAPI-Specification/
 
 ### Validate a request
 
-You can validate any PSR-7 Request implementing the `Psr\Http\Message\RequestInterface` interface.
+You can validate any PSR-7:
+
+- Request implementing the `Psr\Http\Message\RequestInterface` interface.
+- Response implementing the `Psr\Http\Message\ResponseInterface` interface.
 
 ```php
 <?php
 
 use ElevenLabs\Api\Factory\SwaggerSchemaFactory;
 use ElevenLabs\Api\Decoder\Adapter\SymfonyDecoderAdapter;
-use ElevenLabs\Api\Validator\RequestValidator;
+use ElevenLabs\Api\Validator\MessageValidator;
 use JsonSchema\Validator;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\ChainDecoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 // Given a $request implementing the `Psr\Http\Message\RequestInterface`
-// Here we are using the PSR7 Guzzle implementation;
+// For this example we are using the PSR7 Guzzle implementation;
 $request = new Request(
     'POST', 
     'http://domain.tld/api/pets',
@@ -53,7 +60,7 @@ $request = new Request(
 $validator = new Validator();
 
 // Here we are using decoders provided by the symfony serializer component
-// feel free to use yours if you se desire. You just need to create an adapter that 
+// feel free to use yours if you so desire. You just need to create an adapter that 
 // implement the `ElevenLabs\Api\Decoder\DecoderInterface` 
 $decoder = new SymfonyDecoderAdapter(
     new ChainDecoder([
@@ -63,17 +70,35 @@ $decoder = new SymfonyDecoderAdapter(
 );
 
 // Load a JSON swagger 2.0 schema using the SwaggerSchemaFactory class.
-// We plan to support RAML 1.0 and APi Elements (API Blueprint) in the future.
+// We plan to support RAML 1.0 and API Elements (API Blueprint) in the future.
 $schema = (new SwaggerSchemaFactory())->createSchema('file://path/to/your/swagger.json');
 
-$requestValidator = new RequestValidator($schema,$validator,$decoder);
-$requestValidator->validateRequest($request);
+// Find the Request Definition in the Schema API
+$requestDefinition = $schema->getRequestDefinition(
+  $schema->findOperationId($request->getMethod(), $request->getUri()->getPath())  
+);
+
+// Validate the Request
+$messageValidator = new MessageValidator($validator, $decoder);
+$messageValidator->validateRequest($request, $requestDefinition);
 
 // Check if the request has violations
-if ($requestValidator->hasViolations()) {
+if ($messageValidator->hasViolations()) {
     // Get violations and do something with them
-    $violations = $requestValidator->getViolations();
+    $violations = $messageValidator->getViolations();
 }
+
+// Using the message Validator, you can although validate a Response
+// It will find the proper ResponseDefinition from a RequestDefinition
+$response = new Response(
+    200, 
+    ['Content-Type' => 'application/json'],
+    '{"id": 1}'
+);
+
+$messageValidator->validateResponse($response, $requestDefinition);
+
+// ...
 ```
 
 ### Working with Symfony HTTPFoundation Requests
@@ -103,7 +128,7 @@ $requestDefinition = $schema->getRequestDefinition(
 $responseDefinition = $requestDefinition->getResponseDefinition(200);
 
 // From here, you can access the JSON Schema describing the expected response
-$responseSchema = $responseDefinition->getSchema();
+$responseSchema = $responseDefinition->getBodySchema();
 ```
 
 

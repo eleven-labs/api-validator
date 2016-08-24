@@ -1,10 +1,10 @@
 <?php
 namespace ElevenLabs\Api\Definition;
 
-class RequestParameters implements \Serializable, \IteratorAggregate
+class Parameters implements \Serializable, \IteratorAggregate
 {
     /**
-     * @var RequestParameter[]
+     * @var Parameter[]
      */
     private $parameters;
 
@@ -20,6 +20,13 @@ class RequestParameters implements \Serializable, \IteratorAggregate
         return new \ArrayIterator($this->parameters);
     }
 
+    public function hasBodySchema()
+    {
+        $body = $this->getBody();
+
+        return ($body !== null && $body->hasSchema());
+    }
+
     /**
      * JSON Schema for a the body
      *
@@ -27,12 +34,15 @@ class RequestParameters implements \Serializable, \IteratorAggregate
      */
     public function getBodySchema()
     {
-        $body = $this->getBody();
-        if ($body !== null && $body->hasSchema()) {
-            return $body->getSchema();
-        }
+        return $this->getBody()->getSchema();
+    }
 
-        return null;
+    /**
+     * @return bool
+     */
+    public function hasQueryParametersSchema()
+    {
+        return ($this->getSchema($this->getQuery()) !== null);
     }
 
     /**
@@ -40,9 +50,17 @@ class RequestParameters implements \Serializable, \IteratorAggregate
      *
      * @return \stdClass
      */
-    public function getQuerySchema()
+    public function getQueryParametersSchema()
     {
         return $this->getSchema($this->getQuery());
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasHeadersSchema()
+    {
+        return ($this->getHeadersSchema() !== null);
     }
 
     /**
@@ -56,7 +74,7 @@ class RequestParameters implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * @return RequestParameter[]
+     * @return Parameter[]
      */
     public function getPath()
     {
@@ -64,7 +82,7 @@ class RequestParameters implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * @return RequestParameter[]
+     * @return Parameter[]
      */
     public function getQuery()
     {
@@ -72,7 +90,7 @@ class RequestParameters implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * @return RequestParameter[]
+     * @return Parameter[]
      */
     public function getHeaders()
     {
@@ -80,7 +98,7 @@ class RequestParameters implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * @return RequestParameter|null
+     * @return Parameter|null
      */
     public function getBody()
     {
@@ -96,7 +114,7 @@ class RequestParameters implements \Serializable, \IteratorAggregate
      * Get one request parameter by name
      *
      * @param string $name
-     * @return RequestParameter|null
+     * @return Parameter|null
      */
     public function getByName($name)
     {
@@ -108,7 +126,7 @@ class RequestParameters implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * @param RequestParameter[] $parameters
+     * @param Parameter[] $parameters
      *
      * @return \stdClass|null
      */
@@ -147,13 +165,13 @@ class RequestParameters implements \Serializable, \IteratorAggregate
     {
         return array_filter(
             $this->parameters,
-            function (RequestParameter $parameter) use ($location) {
+            function (Parameter $parameter) use ($location) {
                 return $parameter->getLocation() === $location;
             }
         );
     }
 
-    private function addParameter(RequestParameter $parameter)
+    private function addParameter(Parameter $parameter)
     {
         $validLocations = ['path', 'header', 'query', 'body'];
         if (!in_array($parameter->getLocation(), $validLocations)) {

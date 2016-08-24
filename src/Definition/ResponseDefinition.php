@@ -1,7 +1,7 @@
 <?php
 namespace ElevenLabs\Api\Definition;
 
-class ResponseDefinition implements \Serializable
+class ResponseDefinition implements \Serializable, MessageDefinition
 {
     /** @var int */
     private $statusCode;
@@ -9,20 +9,19 @@ class ResponseDefinition implements \Serializable
     /** @var array */
     private $contentTypes;
 
-    /** @var \stdClass */
-    private $schema;
+    /** @var Parameters */
+    private $parameters;
 
     /**
-     * ResponseDefinition constructor.
      * @param int $statusCode
-     * @param array $contentTypes
-     * @param \stdClass $schema
+     * @param array $allowedContentTypes
+     * @param Parameters $parameters
      */
-    public function __construct($statusCode, array $contentTypes, \stdClass $schema = null)
+    public function __construct($statusCode, array $allowedContentTypes, Parameters $parameters)
     {
         $this->statusCode = $statusCode;
-        $this->contentTypes = $contentTypes;
-        $this->schema = $schema;
+        $this->contentTypes = $allowedContentTypes;
+        $this->parameters = $parameters;
     }
 
     /**
@@ -34,11 +33,29 @@ class ResponseDefinition implements \Serializable
     }
 
     /**
+     * @return bool
+     */
+    public function hasBodySchema()
+    {
+        return $this->parameters->hasBodySchema();
+    }
+
+    /**
      * @return \stdClass
      */
-    public function getSchema()
+    public function getBodySchema()
     {
-        return $this->schema;
+        return $this->parameters->getBodySchema();
+    }
+
+    public function hasHeadersSchema()
+    {
+        return $this->parameters->hasHeadersSchema();
+    }
+
+    public function getHeadersSchema()
+    {
+        return $this->parameters->getHeadersSchema();
     }
 
     /**
@@ -55,7 +72,7 @@ class ResponseDefinition implements \Serializable
         return serialize([
             'statusCode' => $this->statusCode,
             'contentTypes' => $this->contentTypes,
-            'schema' => $this->schema
+            'parameters' => $this->parameters
         ]);
     }
 
@@ -64,7 +81,7 @@ class ResponseDefinition implements \Serializable
         $data = unserialize($serialized);
         $this->statusCode = $data['statusCode'];
         $this->contentTypes = $data['contentTypes'];
-        $this->schema = $data['schema'];
+        $this->parameters = $data['parameters'];
     }
 
 }

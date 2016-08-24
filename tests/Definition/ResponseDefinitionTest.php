@@ -8,7 +8,7 @@ class ResponseDefinitionTest extends TestCase
     /** @test */
     public function itCanBeSerialized()
     {
-        $responseDefinition = new ResponseDefinition(200, ['application/json'], new \stdClass());
+        $responseDefinition = new ResponseDefinition(200, ['application/json'], new Parameters([]));
         $serialized = serialize($responseDefinition);
 
         assertThat(unserialize($serialized), self::equalTo($responseDefinition));

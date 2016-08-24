@@ -1,7 +1,7 @@
 <?php
 namespace ElevenLabs\Api\Definition;
 
-class RequestDefinition implements \Serializable
+class RequestDefinition implements \Serializable, MessageDefinition
 {
     /** @var string */
     private $method;
@@ -12,7 +12,7 @@ class RequestDefinition implements \Serializable
     /** @var string */
     private $pathTemplate;
 
-    /** @var RequestParameters */
+    /** @var Parameters */
     private $parameters;
 
     /** @var array */
@@ -25,11 +25,11 @@ class RequestDefinition implements \Serializable
      * @param string $method
      * @param string $operationId
      * @param string $pathTemplate
-     * @param RequestParameters $parameters
+     * @param Parameters $parameters
      * @param array $contentTypes
      * @param ResponseDefinition[] $responses
      */
-    public function __construct($method, $operationId, $pathTemplate, RequestParameters $parameters, array $contentTypes, array $responses)
+    public function __construct($method, $operationId, $pathTemplate, Parameters $parameters, array $contentTypes, array $responses)
     {
         $this->method = $method;
         $this->operationId = $operationId;
@@ -66,7 +66,7 @@ class RequestDefinition implements \Serializable
     }
 
     /**
-     * @return RequestParameters
+     * @return Parameters
      */
     public function getRequestParameters()
     {
@@ -101,6 +101,36 @@ class RequestDefinition implements \Serializable
         }
 
         return $this->responses[$statusCode];
+    }
+
+    public function hasBodySchema()
+    {
+        return $this->parameters->hasBodySchema();
+    }
+
+    public function getBodySchema()
+    {
+        return $this->parameters->getBodySchema();
+    }
+
+    public function hasHeadersSchema()
+    {
+        return $this->parameters->hasHeadersSchema();
+    }
+
+    public function getHeadersSchema()
+    {
+        return $this->parameters->getHeadersSchema();
+    }
+
+    public function hasQueryParametersSchema()
+    {
+        return $this->parameters->hasQueryParametersSchema();
+    }
+
+    public function getQueryParametersSchema()
+    {
+        return $this->parameters->getQueryParametersSchema();
     }
 
     private function addResponseDefinition(ResponseDefinition $response)
