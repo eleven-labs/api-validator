@@ -4,12 +4,12 @@ namespace ElevenLabs\Api\Decoder;
 interface DecoderInterface
 {
     /**
-     * Decode a string into PHP data
+     * Decode a string into \stdClass or an array of \stdClass
      *
      * @param string $data
      * @param string $format
      *
-     * @return array
+     * @return \stdClass
      */
     public function decode($data, $format);
 }

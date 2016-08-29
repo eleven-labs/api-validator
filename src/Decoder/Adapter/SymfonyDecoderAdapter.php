@@ -18,6 +18,20 @@ class SymfonyDecoderAdapter implements DecoderInterface
 
     public function decode($data, $format)
     {
-        return $this->decoder->decode($data, $format);
+        $context = [];
+
+        if ($format === 'json') {
+            // the JSON schema validator need an object hierarchy
+            $context['json_decode_associative'] = false;
+        }
+
+        $decoded = $this->decoder->decode($data, $format, $context);
+
+        if ($format === 'xml') {
+            // the JSON schema validator need an object hierarchy
+            $decoded = json_decode(json_encode($decoded));
+        }
+
+        return $decoded;
     }
 }
