@@ -43,7 +43,7 @@ class SwaggerSchemaFactoryTest extends TestCase
         assertThat($requestDefinition->getMethod(), equalTo('GET'));
         assertThat($requestDefinition->getOperationId(), equalTo('findFood'));
         assertThat($requestDefinition->getContentTypes(), equalTo(['application/json']));
-        assertThat($requestDefinition->getPathTemplate(), equalTo('/food'));
+        assertThat($requestDefinition->getPathTemplate(), equalTo('/api/food'));
         assertThat($requestDefinition->getRequestParameters(), isInstanceOf(Parameters::class));
         assertThat($requestDefinition->getResponseDefinition(304), isInstanceOf(ResponseDefinition::class));
     }

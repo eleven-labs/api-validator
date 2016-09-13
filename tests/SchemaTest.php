@@ -12,13 +12,13 @@ class SchemaTest extends TestCase
     {
         $request = $this->prophesize(RequestDefinition::class);
         $request->getMethod()->willReturn('GET');
-        $request->getPathTemplate()->willReturn('/pets/{id}');
+        $request->getPathTemplate()->willReturn('/api/pets/{id}');
         $request->getOperationId()->willReturn('getPet');
 
         $requests = $this->prophesize(RequestDefinitions::class);
         $requests->getIterator()->willReturn(new \ArrayIterator([$request->reveal()]));
 
-        $schema = new Schema($requests->reveal(), '/api');
+        $schema = new Schema($requests->reveal());
 
         $operationId = $schema->findOperationId('GET', '/api/pets/1234');
 

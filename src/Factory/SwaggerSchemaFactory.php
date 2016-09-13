@@ -94,7 +94,10 @@ class SwaggerSchemaFactory implements SchemaFactory
             $defaultProducedContentTypes = $schema->produces;
         }
 
+        $basePath = (isset($schema->basePath)) ? $schema->basePath : '';
+
         foreach ($schema->paths as $pathTemplate => $methods) {
+
             foreach ($methods as $method => $definition) {
                 $method = strtoupper($method);
                 $contentTypes = $defaultConsumedContentTypes;
@@ -153,7 +156,7 @@ class SwaggerSchemaFactory implements SchemaFactory
                 $definitions[] = new RequestDefinition(
                     $method,
                     $definition->operationId,
-                    $pathTemplate,
+                    $basePath.$pathTemplate,
                     new Parameters($requestParameters),
                     $contentTypes,
                     $responseDefinitions

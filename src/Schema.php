@@ -52,9 +52,7 @@ class Schema implements \Serializable
             if ($requestDefinition->getMethod() !== $method) {
                 continue;
             }
-
-            $pathTemplate = $this->basePath . $requestDefinition->getPathTemplate();
-            $params = $uriTemplateManager->extract($pathTemplate, $path, true);
+            $params = $uriTemplateManager->extract($requestDefinition->getPathTemplate(), $path, true);
             if ($params !== null) {
                 return $requestDefinition->getOperationId();
             }
