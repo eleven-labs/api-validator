@@ -10,6 +10,7 @@ class Parameters implements \Serializable, \IteratorAggregate
 
     public function __construct(array $parameters)
     {
+        $this->parameters = [];
         foreach ($parameters as $parameter) {
             $this->addParameter($parameter);
         }
