@@ -40,6 +40,29 @@ class RequestDefinitionTest extends TestCase
     }
 
     /** @test */
+    public function itProvideAResponseDefinitionUsingDefaultValue()
+    {
+        $statusCodes = [200, 'default'];
+        $responseDefinitions = [];
+        foreach ($statusCodes as $statusCode) {
+            $responseDefinition = $this->prophesize(ResponseDefinition::class);
+            $responseDefinition->getStatusCode()->willReturn($statusCode);
+            $responseDefinitions[] = $responseDefinition->reveal();
+        }
+
+        $requestDefinition = new RequestDefinition(
+            'GET',
+            'getFoo',
+            '/foo/{id}',
+            new Parameters([]),
+            ['application/json'],
+            $responseDefinitions
+        );
+
+        assertThat($requestDefinition->getResponseDefinition(500), self::isInstanceOf(ResponseDefinition::class));
+    }
+
+    /** @test */
     public function itThrowAnExceptionWhenNoResponseDefinitionIsFound()
     {
         $this->expectException(\InvalidArgumentException::class);

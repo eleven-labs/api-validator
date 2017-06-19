@@ -89,7 +89,11 @@ class RequestDefinition implements \Serializable, MessageDefinition
      */
     public function getResponseDefinition($statusCode)
     {
-        if (!isset($this->responses[$statusCode])) {
+        if (isset($this->responses[$statusCode])) {
+            return $this->responses[$statusCode];
+        } else if (isset($this->responses['default'])) {
+            return $this->responses['default'];
+        } else {
             throw new \InvalidArgumentException(
                 sprintf(
                     'No response definition for %s %s is available for status code %s',
@@ -99,8 +103,6 @@ class RequestDefinition implements \Serializable, MessageDefinition
                 )
             );
         }
-
-        return $this->responses[$statusCode];
     }
 
     public function hasBodySchema()
