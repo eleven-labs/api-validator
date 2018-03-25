@@ -1,6 +1,6 @@
 # API Validator
 
-This library provide a set of classes suited to describe a WebService based on the HTTP protocol.
+This library provides a set of classes suited to describe a WebService based on the HTTP protocol.
 
 It can validate [PSR-7 Requests](http://www.php-fig.org/psr/psr-7/) against a schema.
 
@@ -25,7 +25,7 @@ to parse specification files and to validate requests and responses:
 You will need to write a **valid** Swagger 2.0 file in order to use this library. Ensure that this file is valid using 
 the [Swagger Editor](http://editor.swagger.io/). 
 
-You can although validate your specifications 
+You can also validate your specifications 
 using the [Swagger 2.0 JSONSchema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json).
 
 ### Validate a request
@@ -88,7 +88,7 @@ if ($messageValidator->hasViolations()) {
     $violations = $messageValidator->getViolations();
 }
 
-// Using the message Validator, you can although validate a Response
+// Using the message Validator, you can also validate a Response
 // It will find the proper ResponseDefinition from a RequestDefinition
 $response = new Response(
     200, 
@@ -109,7 +109,7 @@ We recommend you to use the [symfony/psr-http-message-bridge](https://github.com
 
 ### Using the schema
 
-You can navigate the `ElevenLabs\Api\Schema` to meed other use cases.
+You can navigate the `ElevenLabs\Api\Schema` to meet other use cases.
 
 Example:
 
