@@ -10,6 +10,7 @@ use JsonSchema\Validator;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Provide validation methods to validate HTTP messages
@@ -54,7 +55,11 @@ class MessageValidator
 
     public function validateMessageBody(MessageInterface $message, MessageDefinition $definition)
     {
-        $bodyString = (string) $message->getBody();
+        if ($message instanceof ServerRequestInterface) {
+            $bodyString = json_encode((array) $message->getParsedBody());
+        } else {
+            $bodyString = (string) $message->getBody();
+        }
         if ($bodyString !== '' && $definition->hasBodySchema()) {
             $contentType = $message->getHeaderLine('Content-Type');
             $decodedBody = $this->decoder->decode(

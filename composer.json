@@ -32,8 +32,8 @@
     "require-dev": {
         "phpunit/phpunit": "^5.4",
         "guzzlehttp/psr7": "^1.3",
-        "symfony/yaml": "^2.7|^3.0",
-        "symfony/serializer": "^2.7|^3.0"
+        "symfony/yaml": "^2.7|^3.0|^4.0",
+        "symfony/serializer": "^2.7|^3.0|^4.0"
     },
     "suggest": {
         "symfony/yaml": "Allow the SwaggerSchemaFactory to handle YAML files",

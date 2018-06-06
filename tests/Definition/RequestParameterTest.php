@@ -12,5 +12,6 @@ class RequestParameterTest extends TestCase
         $serialized = serialize($requestParameter);
 
         assertThat(unserialize($serialized), self::equalTo($requestParameter));
+        self::assertTrue($requestParameter->hasSchema());
     }
 }
