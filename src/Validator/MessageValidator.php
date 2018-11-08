@@ -74,7 +74,6 @@ class MessageValidator
     public function validateHeaders(MessageInterface $message, MessageDefinition $definition)
     {
         if ($definition->hasHeadersSchema()) {
-
             // Transform each header values into a string
             $headers = array_map(
                 function (array $values) {
@@ -172,9 +171,8 @@ class MessageValidator
     {
         $this->validator->check($data, $schema);
         if (! $this->validator->isValid()) {
-
             $violations = array_map(
-                function($error) use ($location) {
+                function ($error) use ($location) {
                     return new ConstraintViolation(
                         $error['property'],
                         $error['message'],

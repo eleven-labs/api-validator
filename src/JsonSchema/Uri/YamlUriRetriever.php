@@ -30,5 +30,4 @@ class YamlUriRetriever extends UriRetriever
 
         return $jsonSchema;
     }
-
 }

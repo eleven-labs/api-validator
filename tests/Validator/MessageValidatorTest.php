@@ -334,5 +334,4 @@ class MessageValidatorTest extends TestCase
     {
         return json_decode(json_encode($array));
     }
-
 }

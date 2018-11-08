@@ -54,5 +54,4 @@ class RequestDefinitions implements \Serializable, \IteratorAggregate
         $data = unserialize($serialized);
         $this->definitions = $data['definitions'];
     }
-
 }

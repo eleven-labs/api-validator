@@ -29,5 +29,4 @@ interface MessageDefinition
      * @return \stdClass
      */
     public function getHeadersSchema();
-
 }
