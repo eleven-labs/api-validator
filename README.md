@@ -1,5 +1,9 @@
 # API Validator
 
+[![Build Status](https://travis-ci.org/eleven-labs/api-validator.svg?branch=master)](https://travis-ci.org/eleven-labs/api-validator)
+[![Code Coverage](https://scrutinizer-ci.com/g/eleven-labs/api-validator/badges/coverage.png)](https://scrutinizer-ci.com/g/eleven-labs/api-validator/)
+[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/eleven-labs/api-validator/badges/quality-score.png)](https://scrutinizer-ci.com/g/eleven-labs/api-validator/)
+
 This library provides a set of classes suited to describe a WebService based on the HTTP protocol.
 
 It can validate [PSR-7 Requests](http://www.php-fig.org/psr/psr-7/) against a schema.

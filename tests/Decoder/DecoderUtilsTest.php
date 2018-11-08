@@ -2,13 +2,14 @@
 
 namespace Decoder;
 use ElevenLabs\Api\Decoder\DecoderUtils;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class DecoderUtilsTest
  *
  * @package Decoder
  */
-class DecoderUtilsTest extends \PHPUnit_Framework_TestCase
+class DecoderUtilsTest extends TestCase
 {
     /**
      * @dataProvider dataForExtractFormatFromContentType

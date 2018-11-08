@@ -1,0 +1,19 @@
+language: php
+cache: false
+
+sudo: false
+
+php:
+  - 5.6
+  - 7.2
+
+before_script:
+  - composer install
+
+script:
+  - composer test-ci
+  - composer cs
+  - composer phpstan
+
+after_script:
+  - sh .travis.coverage.sh
