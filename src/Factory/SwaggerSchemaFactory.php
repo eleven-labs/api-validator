@@ -168,7 +168,6 @@ class SwaggerSchemaFactory implements SchemaFactory
 
     protected function createResponseDefinition($statusCode, array $defaultProducedContentTypes, \stdClass $response)
     {
-        $schema = null;
         $allowedContentTypes = $defaultProducedContentTypes;
         $parameters = [];
         if (isset($response->schema)) {
