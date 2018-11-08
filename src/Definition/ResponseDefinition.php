@@ -83,5 +83,4 @@ class ResponseDefinition implements \Serializable, MessageDefinition
         $this->contentTypes = $data['contentTypes'];
         $this->parameters = $data['parameters'];
     }
-
 }

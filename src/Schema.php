@@ -48,7 +48,6 @@ class Schema implements \Serializable
     {
         $uriTemplateManager = new UriTemplate();
         foreach ($this->requestDefinitions as $requestDefinition) {
-
             if ($requestDefinition->getMethod() !== $method) {
                 continue;
             }

@@ -95,5 +95,4 @@ class Parameter implements \Serializable
         $this->required  = $data['required'];
         $this->schema  = $data['schema'];
     }
-
 }
