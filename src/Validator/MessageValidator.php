@@ -32,10 +32,13 @@ class MessageValidator
 
     public function validateRequest(RequestInterface $request, RequestDefinition $definition)
     {
-        $contentTypeValid = $this->validateContentType($request, $definition);
-        if ($contentTypeValid && in_array($request->getMethod(), ['PUT', 'PATCH', 'POST'])) {
-            $this->validateMessageBody($request, $definition);
+        if ($definition->hasBodySchema()) {
+            $contentTypeValid = $this->validateContentType($request, $definition);
+            if ($contentTypeValid && in_array($request->getMethod(), ['PUT', 'PATCH', 'POST'])) {
+                $this->validateMessageBody($request, $definition);
+            }
         }
+
         $this->validateHeaders($request, $definition);
         $this->validateQueryParameters($request, $definition);
     }
@@ -43,10 +46,13 @@ class MessageValidator
     public function validateResponse(ResponseInterface $response, RequestDefinition $definition)
     {
         $responseDefinition = $definition->getResponseDefinition($response->getStatusCode());
-        $contentTypeValid = $this->validateContentType($response, $responseDefinition);
-        if ($contentTypeValid) {
-            $this->validateMessageBody($response, $responseDefinition);
+        if ($responseDefinition->hasBodySchema()) {
+            $contentTypeValid = $this->validateContentType($response, $responseDefinition);
+            if ($contentTypeValid) {
+                $this->validateMessageBody($response, $responseDefinition);
+            }
         }
+
         $this->validateHeaders($response, $responseDefinition);
     }
 
@@ -93,16 +99,14 @@ class MessageValidator
      * @param MessageInterface $message
      * @param MessageDefinition $definition
      *
-     * @return bool Is valid
+     * @return bool When the content-type is valid
      */
     public function validateContentType(MessageInterface $message, MessageDefinition $definition)
     {
-        $isValid = true;
         $contentType = $message->getHeaderLine('Content-Type');
+        $contentTypes = $definition->getContentTypes();
 
-        if (! in_array($contentType, $definition->getContentTypes())) {
-            $isValid = false;
-
+        if (!in_array($contentType, $contentTypes, true)) {
             if ($contentType === '') {
                 $violationMessage = 'Content-Type should not be empty';
                 $constraint = 'required';
@@ -110,7 +114,7 @@ class MessageValidator
                 $violationMessage = sprintf(
                     '%s is not a supported content type, supported: %s',
                     $message->getHeaderLine('Content-Type'),
-                    implode(', ', $definition->getContentTypes())
+                    implode(', ', $contentTypes)
                 );
                 $constraint = 'enum';
             }
@@ -123,9 +127,11 @@ class MessageValidator
                     'header'
                 )
             );
+
+            return false;
         }
 
-        return $isValid;
+        return true;
     }
 
     public function validateQueryParameters(RequestInterface $request, RequestDefinition $definition)
@@ -148,7 +154,7 @@ class MessageValidator
      */
     public function hasViolations()
     {
-        return (!empty($this->violations));
+        return !empty($this->violations);
     }
 
     /**

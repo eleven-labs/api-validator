@@ -57,7 +57,7 @@ class SwaggerSchemaFactory implements SchemaFactory
                 }
                 $uriRetriever = new YamlUriRetriever();
                 break;
-            case 'json';
+            case 'json':
                 $uriRetriever = new UriRetriever();
                 break;
             default:
