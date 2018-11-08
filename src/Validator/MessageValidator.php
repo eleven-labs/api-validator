@@ -17,15 +17,12 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class MessageValidator
 {
-    /**
-     * @var Validator
-     */
-    protected $validator;
-
-    /**
-     * @var array
-     */
-    protected $violations = [];
+    /** @var Validator */
+    private $validator;
+    /** @var array */
+    private $violations = [];
+    /** @var DecoderInterface */
+    private $decoder;
 
     public function __construct(Validator $validator, DecoderInterface $decoder)
     {

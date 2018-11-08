@@ -1,8 +1,7 @@
 <?php
 
-namespace Decoder;
+namespace ElevenLabs\Api\Decoder;
 
-use ElevenLabs\Api\Decoder\DecoderUtils;
 use PHPUnit\Framework\TestCase;
 
 /**
