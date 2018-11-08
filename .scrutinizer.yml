@@ -1,0 +1,11 @@
+build:
+  environment:
+    php:
+      version: 7.2
+  nodes:
+    analysis:
+      tests:
+        override:
+          - command: php-scrutinizer-run
+          - command: phpcs-run --standard=phpcs.xml.dist
+            use_website_config: false
