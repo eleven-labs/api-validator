@@ -90,4 +90,46 @@ class SwaggerSchemaFactoryTest extends TestCase
         assertThat($responseDefinition->getBodySchema(), isType('object'));
         assertThat($responseDefinition->getStatusCode(), equalTo(200));
     }
+
+    /**
+     * @test
+     * @dataProvider getGuessableContentTypes
+     */
+    public function itGuessTheContentTypeFromRequestParameters($operationId, $expectedContentType)
+    {
+        $schemaFile = 'file://'.dirname(__DIR__).'/fixtures/request-without-content-types.json';
+        $schema = (new SwaggerSchemaFactory())->createSchema($schemaFile);
+        $definition = $schema->getRequestDefinition($operationId);
+
+        assertThat($definition->getContentTypes(), contains($expectedContentType));
+    }
+
+    public function getGuessableContentTypes()
+    {
+        return [
+            'body' => [
+                'operationId' => 'postBodyWithoutAContentType',
+                'contentType' => 'application/json'
+            ],
+            'formData' => [
+                'operationId' => 'postFromDataWithoutAContentType',
+                'contentType' => 'application/x-www-form-urlencoded'
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     */
+    public function itFailWhenTryingToGuessTheContentTypeFromARequestWithMultipleBodyLocations()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage(
+            'Parameters cannot have body and formData locations ' .
+            'at the same time in /post/with-conflicting-locations'
+        );
+
+        $schemaFile = 'file://'.dirname(__DIR__).'/fixtures/request-with-conflicting-locations.json';
+        (new SwaggerSchemaFactory())->createSchema($schemaFile);
+    }
 }

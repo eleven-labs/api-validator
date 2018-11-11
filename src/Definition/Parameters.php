@@ -3,6 +3,8 @@ namespace ElevenLabs\Api\Definition;
 
 class Parameters implements \Serializable, \IteratorAggregate
 {
+
+
     /**
      * @var Parameter[]
      */
@@ -174,10 +176,13 @@ class Parameters implements \Serializable, \IteratorAggregate
 
     private function addParameter(Parameter $parameter)
     {
-        $validLocations = ['path', 'header', 'query', 'body'];
-        if (!in_array($parameter->getLocation(), $validLocations)) {
+        if (!in_array($parameter->getLocation(), Parameter::LOCATIONS, true)) {
             throw new \InvalidArgumentException(
-                $parameter->getLocation(). ' is not a valid parameter location'
+                sprintf(
+                    '%s is not a supported parameter location, supported: %s',
+                    $parameter->getLocation(),
+                    implode(', ', Parameter::LOCATIONS)
+                )
             );
         }
 

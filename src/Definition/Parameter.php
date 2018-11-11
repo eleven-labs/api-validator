@@ -3,6 +3,10 @@ namespace ElevenLabs\Api\Definition;
 
 class Parameter implements \Serializable
 {
+    const LOCATIONS = ['path', 'header', 'query', 'body', 'formData'];
+    const BODY_LOCATIONS = ['formData', 'body'];
+    const BODY_LOCATIONS_TYPES = ['formData' => 'application/x-www-form-urlencoded', 'body'  => 'application/json'];
+
     /**
      * Location of the parameter in the request
      *

@@ -1,0 +1,36 @@
+{
+  "swagger": "2.0",
+  "host": "petstore.swagger.io",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/post/with-conflicting-locations": {
+      "post": {
+        "operationId": "requestWithConflictingLocations",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          },
+          {
+            "in": "formData",
+            "name": "foo",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+      }
+    }
+  }
+}
