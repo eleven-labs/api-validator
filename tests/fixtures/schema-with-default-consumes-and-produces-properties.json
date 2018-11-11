@@ -1,0 +1,18 @@
+{
+  "swagger": "2.0",
+  "host": "domain.tld",
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/something": {
+      "post": {
+        "operationId": "postSomething",
+        "responses": {
+          "201": {
+            "description": "created"
+          }
+        }
+      }
+    }
+  }
+}

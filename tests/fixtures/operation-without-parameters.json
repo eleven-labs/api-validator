@@ -1,0 +1,16 @@
+{
+  "swagger": "2.0",
+  "host": "domain.tld",
+  "paths": {
+    "/something": {
+      "get": {
+        "operationId": "getSomething",
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+      }
+    }
+  }
+}
