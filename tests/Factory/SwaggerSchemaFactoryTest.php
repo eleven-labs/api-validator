@@ -11,84 +11,164 @@ use PHPUnit\Framework\TestCase;
 class SwaggerSchemaFactoryTest extends TestCase
 {
     /** @test */
-    public function itShouldCreateASchemaFromAFile()
+    public function itCanCreateASchemaFromAJsonFile()
     {
-        $schemaFile = 'file://'.__DIR__.'/../fixtures/petstore.json';
-        $factory = new SwaggerSchemaFactory();
-        $schema = $factory->createSchema($schemaFile);
+        $schema = $this->getPetStoreSchemaJson();
 
         assertThat($schema, isInstanceOf(Schema::class));
     }
+
+    /** @test */
+    public function itCanCreateASchemaFromAYamlFile()
+    {
+        $schema = $this->getPetStoreSchemaYaml();
+
+        assertThat($schema, isInstanceOf(Schema::class));
+    }
+
+    /** @test */
+    public function itThrowAnExceptionWhenTheSchemaFileIsNotSupported()
+    {
+        $unsupportedFile = 'file://'.dirname(__DIR__).'/fixtures/petstore.txt';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageRegExp('/does not provide a supported extension/');
+
+        (new SwaggerSchemaFactory())->createSchema($unsupportedFile);
+    }
+
     /** @test */
     public function itShouldHaveSchemaProperties()
     {
-        $schemaFile = 'file://'.__DIR__.'/../fixtures/petstore.json';
-        $factory = new SwaggerSchemaFactory();
-        $schema = $factory->createSchema($schemaFile);
+        $schema = $this->getPetStoreSchemaJson();
 
         assertThat($schema->getHost(), equalTo('petstore.swagger.io'));
-        assertThat($schema->getBasePath(), equalTo('/api'));
-        assertThat($schema->getSchemes(), equalTo(['http']));
+        assertThat($schema->getBasePath(), equalTo('/v2'));
+        assertThat($schema->getSchemes(), equalTo(['https', 'http']));
     }
+
+    /** @test */
+    public function itThrowAnExceptionWhenAnOperationDoesNotProvideAnId()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('You need to provide an operationId for GET /something');
+
+        $this->getSchemaFromFile('operation-without-an-id.json');
+    }
+
+    /** @test */
+    public function itThrowAnExceptionWhenAnOperationDoesNotProvideResponses()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('You need to specify at least one response for GET /something');
+
+        $this->getSchemaFromFile('operation-without-responses.json');
+    }
+
+    /** @test */
+    public function itSupportAnOperationWithoutParameters()
+    {
+        $schema = $this->getSchemaFromFile('operation-without-parameters.json');
+        $definition = $schema->getRequestDefinition('getSomething');
+
+        assertThat($definition->hasHeadersSchema(), isFalse());
+        assertThat($definition->hasBodySchema(), isFalse());
+        assertThat($definition->hasQueryParametersSchema(), isFalse());
+    }
+
     /** @test */
     public function itCanCreateARequestDefinition()
     {
-        $schemaFile = 'file://'.__DIR__.'/../fixtures/petstore.json';
-        $factory = new SwaggerSchemaFactory();
-        $schema = $factory->createSchema($schemaFile);
+        $schema = $this->getPetStoreSchemaJson();
 
-        $requestDefinition = $schema->getRequestDefinition('findFood');
+        $requestDefinition = $schema->getRequestDefinition('findPetsByStatus');
 
         assertThat($requestDefinition, isInstanceOf(RequestDefinition::class));
         assertThat($requestDefinition->getMethod(), equalTo('GET'));
-        assertThat($requestDefinition->getOperationId(), equalTo('findFood'));
-        assertThat($requestDefinition->getContentTypes(), equalTo(['application/json']));
-        assertThat($requestDefinition->getPathTemplate(), equalTo('/api/food'));
+        assertThat($requestDefinition->getOperationId(), equalTo('findPetsByStatus'));
+        assertThat($requestDefinition->getPathTemplate(), equalTo('/v2/pet/findByStatus'));
+        assertThat($requestDefinition->getContentTypes(), equalTo([]));
         assertThat($requestDefinition->getRequestParameters(), isInstanceOf(Parameters::class));
-        assertThat($requestDefinition->getResponseDefinition(304), isInstanceOf(ResponseDefinition::class));
+        assertThat($requestDefinition->getResponseDefinition(200), isInstanceOf(ResponseDefinition::class));
+        assertThat($requestDefinition->getResponseDefinition(400), isInstanceOf(ResponseDefinition::class));
     }
 
     /** @test */
-    public function itCanCreateRequestParameters()
+    public function itCanCreateARequestBodyParameter()
     {
-        $schemaFile = 'file://'.__DIR__.'/../fixtures/petstore.json';
-        $factory = new SwaggerSchemaFactory();
-        $schema = $factory->createSchema($schemaFile);
+        $schema = $this->getPetStoreSchemaJson();
 
         $requestParameters = $schema->getRequestDefinition('addPet')->getRequestParameters();
 
         assertThat($requestParameters, isInstanceOf(Parameters::class));
         assertThat($requestParameters->getBody(), isInstanceOf(Parameter::class));
+        assertThat($requestParameters->hasBodySchema(), isTrue());
         assertThat($requestParameters->getBodySchema(), isType('object'));
+    }
 
-        $requestParameters = $schema->getRequestDefinition('findPetById')->getRequestParameters();
+    /** @test */
+    public function itCanCreateRequestPathParameters()
+    {
+        $schema = $this->getPetStoreSchemaJson();
+
+        $requestParameters = $schema->getRequestDefinition('getPetById')->getRequestParameters();
 
         assertThat($requestParameters->getPath(), containsOnlyInstancesOf(Parameter::class));
+    }
 
-        $requestParameters = $schema->getRequestDefinition('findPets')->getRequestParameters();
+    /** @test */
+    public function itCanCreateRequestQueryParameters()
+    {
+        $schema = $this->getPetStoreSchemaJson();
+
+        $requestParameters = $schema->getRequestDefinition('findPetsByStatus')->getRequestParameters();
 
         assertThat($requestParameters->getQuery(), containsOnlyInstancesOf(Parameter::class));
         assertThat($requestParameters->getQueryParametersSchema(), isType('object'));
+    }
 
-        $requestParameters = $schema->getRequestDefinition('updatePet')->getRequestParameters();
+    /** @test */
+    public function itCanCreateRequestHeadersParameter()
+    {
+        $schema = $this->getPetStoreSchemaJson();
+
+        $requestParameters = $schema->getRequestDefinition('deletePet')->getRequestParameters();
 
         assertThat($requestParameters->getHeaders(), containsOnlyInstancesOf(Parameter::class));
+        assertThat($requestParameters->hasHeadersSchema(), isTrue());
         assertThat($requestParameters->getHeadersSchema(), isType('object'));
     }
 
     /** @test */
     public function itCanCreateAResponseDefinition()
     {
-        $schemaFile = 'file://'.__DIR__.'/../fixtures/petstore.json';
-        $factory = new SwaggerSchemaFactory();
-        $schema = $factory->createSchema($schemaFile);
+        $schema = $this->getPetStoreSchemaJson();
 
-        $responseDefinition = $schema->getRequestDefinition('addPet')->getResponseDefinition(200);
+        $responseDefinition = $schema->getRequestDefinition('getPetById')->getResponseDefinition(200);
 
         assertThat($responseDefinition, isInstanceOf(ResponseDefinition::class));
-        assertThat($responseDefinition->getContentTypes(), contains('application/json'));
         assertThat($responseDefinition->getBodySchema(), isType('object'));
         assertThat($responseDefinition->getStatusCode(), equalTo(200));
+        assertThat($responseDefinition->getContentTypes(), contains('application/json'));
+    }
+
+    public function itUseTheSchemaDefaultConsumesPropertyWhenNotProvidedByAnOperation()
+    {
+        $schema = $this->getSchemaFromFile('schema-with-default-consumes-and-produces-properties.json');
+        $definition = $schema->getRequestDefinition('postSomething');
+
+        assertThat($definition->getContentTypes(), contains('application/json'));
+    }
+
+    /** @test */
+    public function itUseTheSchemaDefaultProducesPropertyWhenNotProvidedByAnOperationResponse()
+    {
+        $schema = $this->getSchemaFromFile('schema-with-default-consumes-and-produces-properties.json');
+        $responseDefinition = $schema
+            ->getRequestDefinition('postSomething')
+            ->getResponseDefinition(201);
+
+        assertThat($responseDefinition->getContentTypes(), contains('application/json'));
     }
 
     /**
@@ -97,8 +177,8 @@ class SwaggerSchemaFactoryTest extends TestCase
      */
     public function itGuessTheContentTypeFromRequestParameters($operationId, $expectedContentType)
     {
-        $schemaFile = 'file://'.dirname(__DIR__).'/fixtures/request-without-content-types.json';
-        $schema = (new SwaggerSchemaFactory())->createSchema($schemaFile);
+        $schema = $this->getSchemaFromFile('request-without-content-types.json');
+
         $definition = $schema->getRequestDefinition($operationId);
 
         assertThat($definition->getContentTypes(), contains($expectedContentType));
@@ -118,9 +198,7 @@ class SwaggerSchemaFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function itFailWhenTryingToGuessTheContentTypeFromARequestWithMultipleBodyLocations()
     {
         $this->expectException(\LogicException::class);
@@ -131,5 +209,34 @@ class SwaggerSchemaFactoryTest extends TestCase
 
         $schemaFile = 'file://'.dirname(__DIR__).'/fixtures/request-with-conflicting-locations.json';
         (new SwaggerSchemaFactory())->createSchema($schemaFile);
+    }
+
+    /**
+     * @return Schema
+     */
+    private function getPetStoreSchemaJson()
+    {
+        return $this->getSchemaFromFile('petstore.json');
+    }
+
+    /**
+     * @return Schema
+     */
+    private function getPetStoreSchemaYaml()
+    {
+        return $this->getSchemaFromFile('petstore.yaml');
+    }
+
+    /**
+     * @param $name
+     *
+     * @return Schema
+     */
+    private function getSchemaFromFile($name)
+    {
+        $schemaFile = 'file://' . dirname(__DIR__) . '/fixtures/'.$name;
+        $factory = new SwaggerSchemaFactory();
+
+        return $factory->createSchema($schemaFile);
     }
 }

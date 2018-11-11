@@ -19,16 +19,17 @@ use Symfony\Component\Yaml\Yaml;
 class SwaggerSchemaFactory implements SchemaFactory
 {
     /**
-     * @param string $schemaFile (must start with a scheme: file://, http://, https://, etc...)
+     * @param string $schemaFile (must start with a scheme: file://, http:// or https://)
+     *
      * @return Schema
      */
     public function createSchema($schemaFile)
     {
         $schema = $this->resolveSchemaFile($schemaFile);
 
-        $host = (isset($schema->host)) ? $schema->host : null;
-        $basePath = (isset($schema->basePath)) ? $schema->basePath : '';
-        $schemes = (isset($schema->schemes)) ? $schema->schemes : ['http'];
+        $host = isset($schema->host) ? $schema->host : null;
+        $basePath = isset($schema->basePath) ? $schema->basePath : '';
+        $schemes = isset($schema->schemes) ? $schema->schemes : ['http'];
 
         return new Schema(
             $this->createRequestDefinitions($schema),
@@ -51,10 +52,13 @@ class SwaggerSchemaFactory implements SchemaFactory
             case 'yml':
             case 'yaml':
                 if (!class_exists(Yaml::class)) {
+                    // @codeCoverageIgnoreStart
                     throw new \InvalidArgumentException(
                         'You need to require the "symfony/yaml" component in order to parse yml files'
                     );
+                    // @codeCoverageIgnoreEnd
                 }
+
                 $uriRetriever = new YamlUriRetriever();
                 break;
             case 'json':
@@ -137,11 +141,16 @@ class SwaggerSchemaFactory implements SchemaFactory
                     $requestParameters[] = $this->createParameter($parameter);
                 }
 
+                $responseContentTypes = $defaultProducedContentTypes;
+                if (isset($definition->produces)) {
+                    $responseContentTypes = $definition->produces;
+                }
+
                 $responseDefinitions = [];
                 foreach ($definition->responses as $statusCode => $response) {
                     $responseDefinitions[] = $this->createResponseDefinition(
                         $statusCode,
-                        $defaultProducedContentTypes,
+                        $responseContentTypes,
                         $response
                     );
                 }
@@ -192,7 +201,7 @@ class SwaggerSchemaFactory implements SchemaFactory
 
         $bodyLocations = [];
         foreach ($definition->parameters as $parameter) {
-            if (isset($parameter->in) || \in_array($parameter->in, Parameter::BODY_LOCATIONS, true)) {
+            if (isset($parameter->in) && \in_array($parameter->in, Parameter::BODY_LOCATIONS, true)) {
                 $bodyLocations[] = $parameter->in;
             }
         }
@@ -226,6 +235,7 @@ class SwaggerSchemaFactory implements SchemaFactory
                 'schema' => $response->schema
             ]);
         }
+
         if (isset($response->headers)) {
             foreach ($response->headers as $headerName => $schema) {
                 $schema->in = 'header';
@@ -233,9 +243,6 @@ class SwaggerSchemaFactory implements SchemaFactory
                 $schema->required = true;
                 $parameters[] = $this->createParameter($schema);
             }
-        }
-        if (isset($response->produces)) {
-            $allowedContentTypes = $defaultProducedContentTypes;
         }
 
         return new ResponseDefinition($statusCode, $allowedContentTypes, new Parameters($parameters));
@@ -253,8 +260,8 @@ class SwaggerSchemaFactory implements SchemaFactory
         $parameter = get_object_vars($parameter);
         $location = $parameter['in'];
         $name = $parameter['name'];
-        $schema = (isset($parameter['schema'])) ? $parameter['schema'] : new \stdClass();
-        $required = (isset($parameter['required'])) ? $parameter['required'] : false;
+        $schema = isset($parameter['schema']) ? $parameter['schema'] : new \stdClass();
+        $required = isset($parameter['required']) ? $parameter['required'] : false;
 
         unset($parameter['in']);
         unset($parameter['name']);
