@@ -60,6 +60,19 @@ class Schema implements \Serializable
         throw new \InvalidArgumentException('Unable to resolve the operationId for path ' . $path);
     }
 
+    /**
+     * @return \Generator
+     */
+    public function getRequestDefinitions()
+    {
+        foreach ($this->requestDefinitions as $operationId => $request) {
+            yield $operationId => $request;
+        }
+    }
+
+    /**
+     * @return RequestDefinition
+     */
     public function getRequestDefinition($operationId)
     {
         if (!isset($this->requestDefinitions[$operationId])) {

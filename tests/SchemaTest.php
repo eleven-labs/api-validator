@@ -8,6 +8,28 @@ use PHPUnit\Framework\TestCase;
 class SchemaTest extends TestCase
 {
     /** @test */
+    public function itCanIterateAvailableOperations()
+    {
+        $request = $this->prophesize(RequestDefinition::class);
+        $request->getMethod()->willReturn('GET');
+        $request->getPathTemplate()->willReturn('/api/pets/{id}');
+        $request->getOperationId()->willReturn('getPet');
+
+        $requests = $this->prophesize(RequestDefinitions::class);
+        $requests->getIterator()->willReturn(new \ArrayIterator([$request->reveal()]));
+
+        $schema = new Schema($requests->reveal());
+
+        $operations = $schema->getRequestDefinitions();
+
+        assertTrue($operations instanceof \Generator);
+
+        foreach ($operations as $operationId => $operation) {
+            assertThat($operationId, equalTo('getPet'));
+        }
+    }
+
+    /** @test */
     public function itCanResolveAnOperationIdFromAPathAndMethod()
     {
         $request = $this->prophesize(RequestDefinition::class);
