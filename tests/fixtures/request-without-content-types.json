@@ -1,0 +1,50 @@
+{
+  "swagger": "2.0",
+  "host": "petstore.swagger.io",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/post/body-without-a-content-type": {
+      "post": {
+        "operationId": "postBodyWithoutAContentType",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/post/form-data-without-a-content-type": {
+      "post": {
+        "operationId": "postFromDataWithoutAContentType",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "foo",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+      }
+    }
+  }
+}

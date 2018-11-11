@@ -94,7 +94,7 @@ class SwaggerSchemaFactory implements SchemaFactory
             $defaultProducedContentTypes = $schema->produces;
         }
 
-        $basePath = (isset($schema->basePath)) ? $schema->basePath : '';
+        $basePath = isset($schema->basePath) ? $schema->basePath : '';
 
         foreach ($schema->paths as $pathTemplate => $methods) {
             foreach ($methods as $method => $definition) {
@@ -114,14 +114,8 @@ class SwaggerSchemaFactory implements SchemaFactory
                     );
                 }
 
-                if (empty($contentTypes)) {
-                    throw new \LogicException(
-                        sprintf(
-                            'You need to specify at least one ContentType for %s %s',
-                            $method,
-                            $pathTemplate
-                        )
-                    );
+                if (empty($contentTypes) && $this->containsBodyParametersLocations($definition)) {
+                    $contentTypes = $this->guessSupportedContentTypes($definition, $pathTemplate);
                 }
 
                 if (!isset($definition->responses)) {
@@ -164,6 +158,60 @@ class SwaggerSchemaFactory implements SchemaFactory
         }
 
         return new RequestDefinitions($definitions);
+    }
+
+    /**
+     * @return bool
+     */
+    private function containsBodyParametersLocations(\stdClass $definition)
+    {
+        if (!isset($definition->parameters)) {
+            return false;
+        }
+
+        foreach ($definition->parameters as $parameter) {
+            if (isset($parameter->in) && \in_array($parameter->in, Parameter::BODY_LOCATIONS, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \stdClass $definition
+     * @param string $pathTemplate
+     *
+     * @return array
+     */
+    private function guessSupportedContentTypes(\stdClass $definition, $pathTemplate)
+    {
+        if (!isset($definition->parameters)) {
+            return [];
+        }
+
+        $bodyLocations = [];
+        foreach ($definition->parameters as $parameter) {
+            if (isset($parameter->in) || \in_array($parameter->in, Parameter::BODY_LOCATIONS, true)) {
+                $bodyLocations[] = $parameter->in;
+            }
+        }
+
+        if (count($bodyLocations) > 1) {
+            throw new \LogicException(
+                sprintf(
+                    'Parameters cannot have %s locations at the same time in %s',
+                    implode(' and ', $bodyLocations),
+                    $pathTemplate
+                )
+            );
+        }
+
+        if (count($bodyLocations) === 1) {
+            return [Parameter::BODY_LOCATIONS_TYPES[current($bodyLocations)]];
+        }
+
+        return [];
     }
 
     protected function createResponseDefinition($statusCode, array $defaultProducedContentTypes, \stdClass $response)
