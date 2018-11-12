@@ -8,7 +8,7 @@ use ElevenLabs\Api\Definition\RequestDefinitions;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use ElevenLabs\Api\Schema;
 use ElevenLabs\Api\JsonSchema\Uri\YamlUriRetriever;
-use JsonSchema\RefResolver;
+use JsonSchema\SchemaStorage;
 use JsonSchema\Uri\UriResolver;
 use JsonSchema\Uri\UriRetriever;
 use Symfony\Component\Yaml\Yaml;
@@ -73,12 +73,12 @@ class SwaggerSchemaFactory implements SchemaFactory
                 );
         }
 
-        $refResolver = new RefResolver(
+        $refResolver = new SchemaStorage(
             $uriRetriever,
             new UriResolver()
         );
 
-        return $refResolver->resolve($schemaFile);
+        return $refResolver->resolveRef($schemaFile);
     }
 
     /**

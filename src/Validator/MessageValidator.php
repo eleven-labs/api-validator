@@ -7,6 +7,7 @@ use ElevenLabs\Api\Definition\MessageDefinition;
 use ElevenLabs\Api\Definition\RequestDefinition;
 use ElevenLabs\Api\Normalizer\QueryParamsNormalizer;
 use JsonSchema\Validator;
+use JsonSchema\Constraints\Constraint as JsonSchemaConstraint;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -172,7 +173,7 @@ class MessageValidator
      */
     protected function validate($data, $schema, $location)
     {
-        $this->validator->check($data, $schema);
+        $this->validator->check($data, $schema, null, JsonSchemaConstraint::CHECK_MODE_COERCE_TYPES);
         if (! $this->validator->isValid()) {
             $violations = array_map(
                 function ($error) use ($location) {
