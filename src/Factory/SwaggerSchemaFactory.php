@@ -8,7 +8,7 @@ use ElevenLabs\Api\Definition\RequestDefinitions;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use ElevenLabs\Api\Schema;
 use ElevenLabs\Api\JsonSchema\Uri\YamlUriRetriever;
-use JsonSchema\RefResolver;
+use JsonSchema\SchemaStorage;
 use JsonSchema\Uri\UriResolver;
 use JsonSchema\Uri\UriRetriever;
 use Symfony\Component\Yaml\Yaml;
@@ -73,12 +73,31 @@ class SwaggerSchemaFactory implements SchemaFactory
                 );
         }
 
-        $refResolver = new RefResolver(
+        $schemaStorage = new SchemaStorage(
             $uriRetriever,
             new UriResolver()
         );
 
-        return $refResolver->resolve($schemaFile);
+        $schema = $schemaStorage->getSchema($schemaFile);
+
+        // JsonSchema normally defers resolution of $ref values until validation.
+        // That does not work for us, because we need to have the complete schema
+        // to build definitions.
+        $this->expandSchemaReferences($schema, $schemaStorage);
+
+        return $schema;
+    }
+
+    private function expandSchemaReferences(&$schema, SchemaStorage $schemaStorage)
+    {
+        foreach ($schema as &$member) {
+            if (is_object($member) && property_exists($member, '$ref') && is_string($member->{'$ref'})) {
+                $member = $schemaStorage->resolveRef($member->{'$ref'});
+            }
+            if (is_object($member) || is_array($member)) {
+                $this->expandSchemaReferences($member, $schemaStorage);
+            }
+        }
     }
 
     /**

@@ -125,6 +125,16 @@ class RequestDefinition implements \Serializable, MessageDefinition
         return $this->parameters->getHeadersSchema();
     }
 
+    public function hasPathSchema()
+    {
+        return $this->parameters->hasPathSchema();
+    }
+
+    public function getPathSchema()
+    {
+        return $this->parameters->getPathSchema();
+    }
+
     public function hasQueryParametersSchema()
     {
         return $this->parameters->hasQueryParametersSchema();

@@ -107,7 +107,7 @@ class SwaggerSchemaFactoryTest extends TestCase
     }
 
     /** @test */
-    public function itCanCreateRequestPathParameters()
+    public function itCanCreateRequestPath()
     {
         $schema = $this->getPetStoreSchemaJson();
 

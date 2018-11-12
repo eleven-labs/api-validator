@@ -169,6 +169,38 @@ class MessageValidatorTest extends TestCase
     }
 
     /** @test */
+    public function itValidatesPathWithCoercion()
+    {
+        $pathParametersSchema = $this->toObject([
+            'type' => 'object',
+            'properties' => [
+                'id' => [
+                    'type' => 'integer',
+                    'minimum' => 1,
+                ],
+            ],
+        ]);
+
+        $requestUri = $this->prophesize(UriInterface::class);
+        $requestUri->getPath()->willReturn('/users/1');
+
+        $request = $this->prophesize(RequestInterface::class);
+        $request->getUri()->willReturn($requestUri);
+
+        $definition = $this->prophesize(RequestDefinition::class);
+        $definition->getPathTemplate()->willReturn('/users/{id}');
+        $definition->hasPathSchema()->willReturn(true);
+        $definition->getPathSchema()->willReturn($pathParametersSchema);
+
+        $this->messageValidator->validatePath(
+            $request->reveal(),
+            $definition->reveal()
+        );
+
+        assertThat($this->messageValidator->hasViolations(), isFalse());
+    }
+
+    /** @test */
     public function itValidateARequestQueryParameters()
     {
         $expectedViolation = [
@@ -215,6 +247,7 @@ class MessageValidatorTest extends TestCase
         $expectedViolations = [
             new ConstraintViolation('id', 'String value found, but an integer is required', 'type', 'body'),
             new ConstraintViolation('X-Required-Header', 'The property X-Required-Header is required', 'required', 'header'),
+            new ConstraintViolation('id', 'String value found, but an integer is required', 'type', 'path'),
             new ConstraintViolation('limit', 'String value found, but an integer is required', 'type', 'query'),
         ];
 
@@ -226,6 +259,15 @@ class MessageValidatorTest extends TestCase
                     'type' => 'string'
                 ]
             ]
+        ]);
+
+        $pathSchema = $this->toObject([
+            'type' => 'object',
+            'properties' => [
+                'id' => [
+                    'type' => 'integer',
+                ],
+            ],
         ]);
 
         $bodySchema = $this->toObject([
@@ -248,7 +290,8 @@ class MessageValidatorTest extends TestCase
         ]);
 
         $uri = $this->prophesize(UriInterface::class);
-        $uri->getQuery()->willreturn('limit=invalid');
+        $uri->getPath()->willReturn('/users');
+        $uri->getQuery()->willReturn('limit=invalid');
 
         $request = $this->prophesize(RequestInterface::class);
         $request->getMethod()->willReturn('POST');
@@ -259,10 +302,13 @@ class MessageValidatorTest extends TestCase
 
         $definition = $this->prophesize(RequestDefinition::class);
         $definition->getContentTypes()->willReturn(['application/json']);
+        $definition->getPathTemplate()->willReturn('/users/{id}');
         $definition->hasBodySchema()->willReturn(true);
         $definition->getBodySchema()->willReturn($bodySchema);
         $definition->hasHeadersSchema()->willReturn(true);
         $definition->getHeadersSchema()->willReturn($headersSchema);
+        $definition->hasPathSchema()->willReturn(true);
+        $definition->getPathSchema()->willReturn($pathSchema);
         $definition->hasQueryParametersSchema()->willReturn(true);
         $definition->getQueryParametersSchema()->willReturn($queryParametersSchema);
 
