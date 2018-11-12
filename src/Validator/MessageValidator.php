@@ -11,6 +11,7 @@ use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Rize\UriTemplate;
 
 /**
  * Provide validation methods to validate HTTP messages
@@ -40,6 +41,7 @@ class MessageValidator
         }
 
         $this->validateHeaders($request, $definition);
+        $this->validatePath($request, $definition);
         $this->validateQueryParameters($request, $definition);
     }
 
@@ -134,6 +136,21 @@ class MessageValidator
         return true;
     }
 
+    public function validatePath(RequestInterface $request, RequestDefinition $definition)
+    {
+        if ($definition->hasPathSchema()) {
+            $template = new UriTemplate();
+            $params = $template->extract($definition->getPathTemplate(), $request->getUri()->getPath(), false);
+            $schema = $definition->getPathSchema();
+
+            $this->validate(
+                (object) $params,
+                $schema,
+                'path'
+            );
+        }
+    }
+
     public function validateQueryParameters(RequestInterface $request, RequestDefinition $definition)
     {
         if ($definition->hasQueryParametersSchema()) {
@@ -172,7 +189,7 @@ class MessageValidator
      */
     protected function validate($data, $schema, $location)
     {
-        $this->validator->check($data, $schema);
+        $this->validator->coerce($data, $schema);
         if (! $this->validator->isValid()) {
             $violations = array_map(
                 function ($error) use ($location) {

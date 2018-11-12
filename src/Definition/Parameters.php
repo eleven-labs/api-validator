@@ -3,8 +3,6 @@ namespace ElevenLabs\Api\Definition;
 
 class Parameters implements \Serializable, \IteratorAggregate
 {
-
-
     /**
      * @var Parameter[]
      */
@@ -31,7 +29,7 @@ class Parameters implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * JSON Schema for a the body
+     * JSON Schema for the body.
      *
      * @return \stdClass|null
      */
@@ -43,15 +41,33 @@ class Parameters implements \Serializable, \IteratorAggregate
     /**
      * @return bool
      */
-    public function hasQueryParametersSchema()
+    public function hasPathSchema()
     {
-        return ($this->getSchema($this->getQuery()) !== null);
+        return $this->getPathSchema() !== null;
     }
 
     /**
-     * JSON Schema for a the query parameters
+     * JSON Schema for the path parameters.
      *
-     * @return \stdClass
+     * @return \stdClass|null
+     */
+    public function getPathSchema()
+    {
+        return $this->getSchema($this->getPath());
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasQueryParametersSchema()
+    {
+        return $this->getQueryParametersSchema() !== null;
+    }
+
+    /**
+     * JSON Schema for the query parameters.
+     *
+     * @return \stdClass|null
      */
     public function getQueryParametersSchema()
     {
@@ -63,13 +79,13 @@ class Parameters implements \Serializable, \IteratorAggregate
      */
     public function hasHeadersSchema()
     {
-        return ($this->getHeadersSchema() !== null);
+        return $this->getHeadersSchema() !== null;
     }
 
     /**
-     * JSON Schema for the headers
+     * JSON Schema for the headers.
      *
-     * @return \stdClass
+     * @return \stdClass|null
      */
     public function getHeadersSchema()
     {

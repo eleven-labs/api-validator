@@ -3,3 +3,4 @@
 /composer.lock
 /build
 /phpstan.phar
+/phpunit.xml
