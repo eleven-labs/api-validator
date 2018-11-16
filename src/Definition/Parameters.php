@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Definition;
 
 class Parameters implements \Serializable, \IteratorAggregate
@@ -6,22 +7,24 @@ class Parameters implements \Serializable, \IteratorAggregate
     /**
      * @var Parameter[]
      */
-    private $parameters;
+    private $parameters = [];
 
     public function __construct(array $parameters)
     {
-        $this->parameters = [];
         foreach ($parameters as $parameter) {
             $this->addParameter($parameter);
         }
     }
 
-    public function getIterator()
+    // IteratorAggregate
+    public function getIterator(): iterable
     {
-        return new \ArrayIterator($this->parameters);
+        foreach ($this->parameters as $name => $parameter) {
+            yield $name => $parameter;
+        }
     }
 
-    public function hasBodySchema()
+    public function hasBodySchema(): bool
     {
         $body = $this->getBody();
 
@@ -30,64 +33,47 @@ class Parameters implements \Serializable, \IteratorAggregate
 
     /**
      * JSON Schema for the body.
-     *
-     * @return \stdClass|null
      */
-    public function getBodySchema()
+    public function getBodySchema(): ?object
     {
         return $this->getBody()->getSchema();
     }
 
-    /**
-     * @return bool
-     */
-    public function hasPathSchema()
+    public function hasPathSchema(): bool
     {
         return $this->getPathSchema() !== null;
     }
 
     /**
      * JSON Schema for the path parameters.
-     *
-     * @return \stdClass|null
      */
-    public function getPathSchema()
+    public function getPathSchema(): ?object
     {
         return $this->getSchema($this->getPath());
     }
 
-    /**
-     * @return bool
-     */
-    public function hasQueryParametersSchema()
+    public function hasQueryParametersSchema(): bool
     {
         return $this->getQueryParametersSchema() !== null;
     }
 
     /**
      * JSON Schema for the query parameters.
-     *
-     * @return \stdClass|null
      */
-    public function getQueryParametersSchema()
+    public function getQueryParametersSchema(): ?object
     {
         return $this->getSchema($this->getQuery());
     }
 
-    /**
-     * @return bool
-     */
-    public function hasHeadersSchema()
+    public function hasHeadersSchema(): bool
     {
         return $this->getHeadersSchema() !== null;
     }
 
     /**
      * JSON Schema for the headers.
-     *
-     * @return \stdClass|null
      */
-    public function getHeadersSchema()
+    public function getHeadersSchema(): ?object
     {
         return $this->getSchema($this->getHeaders());
     }
@@ -95,7 +81,7 @@ class Parameters implements \Serializable, \IteratorAggregate
     /**
      * @return Parameter[]
      */
-    public function getPath()
+    public function getPath(): array
     {
         return $this->findByLocation('path');
     }
@@ -103,7 +89,7 @@ class Parameters implements \Serializable, \IteratorAggregate
     /**
      * @return Parameter[]
      */
-    public function getQuery()
+    public function getQuery(): array
     {
         return $this->findByLocation('query');
     }
@@ -111,15 +97,12 @@ class Parameters implements \Serializable, \IteratorAggregate
     /**
      * @return Parameter[]
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->findByLocation('header');
     }
 
-    /**
-     * @return Parameter|null
-     */
-    public function getBody()
+    public function getBody(): ?Parameter
     {
         $match = $this->findByLocation('body');
         if (empty($match)) {
@@ -146,10 +129,8 @@ class Parameters implements \Serializable, \IteratorAggregate
 
     /**
      * @param Parameter[] $parameters
-     *
-     * @return \stdClass|null
      */
-    private function getSchema(array $parameters)
+    private function getSchema(array $parameters): ?object
     {
         if (empty($parameters)) {
             return null;
@@ -169,18 +150,23 @@ class Parameters implements \Serializable, \IteratorAggregate
         return $schema;
     }
 
+    // Serializable
     public function serialize()
     {
         return serialize(['parameters' => $this->parameters]);
     }
 
+    // Serializable
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
         $this->parameters = $data['parameters'];
     }
 
-    private function findByLocation($location)
+    /**
+     * @return Parameter[]
+     */
+    private function findByLocation($location): array
     {
         return array_filter(
             $this->parameters,
@@ -192,16 +178,6 @@ class Parameters implements \Serializable, \IteratorAggregate
 
     private function addParameter(Parameter $parameter)
     {
-        if (!in_array($parameter->getLocation(), Parameter::LOCATIONS, true)) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    '%s is not a supported parameter location, supported: %s',
-                    $parameter->getLocation(),
-                    implode(', ', Parameter::LOCATIONS)
-                )
-            );
-        }
-
         $this->parameters[$parameter->getName()] = $parameter;
     }
 }

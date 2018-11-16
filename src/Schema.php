@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api;
 
 use ElevenLabs\Api\Definition\RequestDefinition;
@@ -8,7 +9,7 @@ use Rize\UriTemplate;
 class Schema implements \Serializable
 {
     /** @var RequestDefinitions */
-    private $requestDefinitions = [];
+    private $requestDefinitions;
 
     /** @var string */
     private $host;
@@ -20,39 +21,32 @@ class Schema implements \Serializable
     private $schemes;
 
     /**
-     * @param RequestDefinitions $requestDefinitions
-     * @param string $basePath
-     * @param string $host
-     * @param array $schemes
+     * @param string[] $schemes
      */
-    public function __construct(RequestDefinitions $requestDefinitions, $basePath = '', $host = null, array $schemes = ['http'])
-    {
-        foreach ($requestDefinitions as $request) {
-            $this->addRequestDefinition($request);
-        }
+    public function __construct(
+        RequestDefinitions $requestDefinitions,
+        string $basePath = '',
+        string $host = '',
+        array $schemes = ['http']
+    ) {
+        $this->requestDefinitions = $requestDefinitions;
         $this->host = $host;
         $this->basePath = $basePath;
         $this->schemes = $schemes;
     }
 
     /**
-     * Find the operationId associated to a given path and method
+     * Find the operationId associated to a given path and method.
      *
-     * @todo Implement a less expensive finder
-     * @param string $method An HTTP method
-     * @param string $path A path (ex: /foo/1)
-     *
-     * @return string The operationId
+     * @throws \InvalidArgumentException If no matching operation ID is found.
      */
-    public function findOperationId($method, $path)
+    public function findOperationId(string $method, string $path): string
     {
-        $uriTemplateManager = new UriTemplate();
         foreach ($this->requestDefinitions as $requestDefinition) {
             if ($requestDefinition->getMethod() !== $method) {
                 continue;
             }
-            $params = $uriTemplateManager->extract($requestDefinition->getPathTemplate(), $path, true);
-            if ($params !== null) {
+            if ($this->isMatchingPath($requestDefinition->getPathTemplate(), $path)) {
                 return $requestDefinition->getOperationId();
             }
         }
@@ -60,52 +54,35 @@ class Schema implements \Serializable
         throw new \InvalidArgumentException('Unable to resolve the operationId for path ' . $path);
     }
 
-    /**
-     * @return \Generator
-     */
-    public function getRequestDefinitions()
+    public function getRequestDefinitions(): RequestDefinitions
     {
-        foreach ($this->requestDefinitions as $operationId => $request) {
-            yield $operationId => $request;
-        }
+        return $this->requestDefinitions;
     }
 
-    /**
-     * @return RequestDefinition
-     */
-    public function getRequestDefinition($operationId)
+    public function getRequestDefinition(string $operationId): RequestDefinition
     {
-        if (!isset($this->requestDefinitions[$operationId])) {
-            throw new \InvalidArgumentException('Unable to get the request definition for '.$operationId);
-        }
-
-        return $this->requestDefinitions[$operationId];
+        return $this->requestDefinitions->getRequestDefinition($operationId);
     }
 
-    /**
-     * @return string
-     */
-    public function getHost()
+    public function getHost(): string
     {
         return $this->host;
     }
 
-    /**
-     * @return string
-     */
-    public function getBasePath()
+    public function getBasePath(): string
     {
         return $this->basePath;
     }
 
     /**
-     * @return array
+     * @return string[]
      */
-    public function getSchemes()
+    public function getSchemes(): array
     {
         return $this->schemes;
     }
 
+    // Serializable
     public function serialize()
     {
         return serialize([
@@ -116,6 +93,7 @@ class Schema implements \Serializable
         ]);
     }
 
+    // Serializable
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
@@ -125,8 +103,12 @@ class Schema implements \Serializable
         $this->requestDefinitions = $data['requests'];
     }
 
-    private function addRequestDefinition(RequestDefinition $request)
+    private function isMatchingPath(string $pathTemplate, string $requestPath): bool
     {
-        $this->requestDefinitions[$request->getOperationId()] = $request;
+        if ($pathTemplate === $requestPath) {
+            return true;
+        }
+
+        return (new UriTemplate())->extract($pathTemplate, $requestPath, true) !== null;
     }
 }

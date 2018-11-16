@@ -1,32 +1,33 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Definition;
 
 interface MessageDefinition
 {
     /**
-     * An array of supported content types
+     * Get a list of supported content types.
      *
-     * @return array
+     * @return string[]
      */
-    public function getContentTypes();
+    public function getContentTypes(): array;
 
     /**
-     * @return bool
+     * Check if a schema for body is available.
      */
-    public function hasBodySchema();
+    public function hasBodySchema(): bool;
 
     /**
-     * @return \stdClass
+     * Get the schema for the body.
      */
-    public function getBodySchema();
+    public function getBodySchema(): ?object;
 
     /**
-     * @return bool
+     * Check if a schema for headers is available.
      */
-    public function hasHeadersSchema();
+    public function hasHeadersSchema(): bool;
 
     /**
-     * @return \stdClass
+     * Get the schema for the headers.
      */
-    public function getHeadersSchema();
+    public function getHeadersSchema(): ?object;
 }

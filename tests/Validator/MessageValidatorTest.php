@@ -351,12 +351,12 @@ class MessageValidatorTest extends TestCase
         ]);
 
         $response = $this->prophesize(ResponseInterface::class);
-        $response->getStatusCode()->willReturn('200');
+        $response->getStatusCode()->willReturn(200);
         $response->getBody()->willReturn('{"id": "invalid"}');
         $response->getHeaderLine('Content-Type')->willReturn('application/json');
         $response->getHeaders()->willReturn([]);
 
-        $responseDefinition = $this->prophesize(RequestDefinition::class);
+        $responseDefinition = $this->prophesize(ResponseDefinition::class);
         $responseDefinition->getContentTypes()->willReturn(['application/json']);
         $responseDefinition->hasBodySchema()->willReturn(true);
         $responseDefinition->getBodySchema()->willReturn($bodySchema);
@@ -364,7 +364,7 @@ class MessageValidatorTest extends TestCase
         $responseDefinition->getHeadersSchema()->willReturn($headersSchema);
 
         $definition = $this->prophesize(RequestDefinition::class);
-        $definition->getResponseDefinition('200')->willReturn($responseDefinition);
+        $definition->getResponseDefinition(200)->willReturn($responseDefinition);
 
         $this->messageValidator->validateResponse(
             $response->reveal(),

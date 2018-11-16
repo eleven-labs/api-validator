@@ -28,22 +28,6 @@ class RequestParametersTest extends TestCase
     }
 
     /** @test */
-    public function itThrowAnExceptionOnUnsupportedParameterLocation()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            'nowhere is not a supported parameter location, ' .
-            'supported: path, header, query, body, formData'
-        );
-
-        $param = $this->prophesize(Parameter::class);
-        $param->getName()->willreturn('foo');
-        $param->getLocation()->willreturn('nowhere');
-
-        new Parameters([$param->reveal()]);
-    }
-
-    /** @test */
     public function itCanResolveARequestParameterByName()
     {
         $requestParameter = $this->prophesize(Parameter::class);

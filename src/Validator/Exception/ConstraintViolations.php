@@ -1,10 +1,12 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Validator\Exception;
 
 use ElevenLabs\Api\Validator\ConstraintViolation;
 
 class ConstraintViolations extends \Exception
 {
+    /** @var ConstraintViolation[] */
     private $violations;
 
     /**
@@ -16,15 +18,15 @@ class ConstraintViolations extends \Exception
         parent::__construct((string) $this);
     }
 
-    public function getViolations()
+    /**
+     * @return ConstraintViolation[]
+     */
+    public function getViolations(): array
     {
         return $this->violations;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         $message = "Request constraint violations:\n";
         foreach ($this->violations as $violation) {

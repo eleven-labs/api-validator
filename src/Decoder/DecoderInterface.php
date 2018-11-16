@@ -1,15 +1,13 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Decoder;
 
 interface DecoderInterface
 {
     /**
-     * Decode a string into \stdClass or an array of \stdClass
+     * Decode a string into an object or array of objects.
      *
-     * @param string $data
-     * @param string $format
-     *
-     * @return \stdClass
+     * @return object|object[]
      */
-    public function decode($data, $format);
+    public function decode(string $data, string $format);
 }
