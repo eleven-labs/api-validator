@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Decoder\Adapter;
 
 use ElevenLabs\Api\Decoder\DecoderInterface;
@@ -6,9 +7,7 @@ use Symfony\Component\Serializer\Encoder\DecoderInterface as SymfonyDecoderInter
 
 class SymfonyDecoderAdapter implements DecoderInterface
 {
-    /**
-     * @var SymfonyDecoderInterface
-     */
+    /** @var SymfonyDecoderInterface */
     private $decoder;
 
     public function __construct(SymfonyDecoderInterface $decoder)
@@ -16,7 +15,7 @@ class SymfonyDecoderAdapter implements DecoderInterface
         $this->decoder = $decoder;
     }
 
-    public function decode($data, $format)
+    public function decode(string $data, string $format)
     {
         $context = [];
 

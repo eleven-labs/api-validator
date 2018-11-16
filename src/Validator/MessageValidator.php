@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Validator;
 
 use ElevenLabs\Api\Decoder\DecoderInterface;
@@ -12,6 +13,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Rize\UriTemplate;
+use stdClass;
 
 /**
  * Provide validation methods to validate HTTP messages
@@ -20,8 +22,10 @@ class MessageValidator
 {
     /** @var Validator */
     private $validator;
+
     /** @var array */
     private $violations = [];
+
     /** @var DecoderInterface */
     private $decoder;
 
@@ -31,7 +35,7 @@ class MessageValidator
         $this->decoder = $decoder;
     }
 
-    public function validateRequest(RequestInterface $request, RequestDefinition $definition)
+    public function validateRequest(RequestInterface $request, RequestDefinition $definition): void
     {
         if ($definition->hasBodySchema()) {
             $contentTypeValid = $this->validateContentType($request, $definition);
@@ -45,7 +49,7 @@ class MessageValidator
         $this->validateQueryParameters($request, $definition);
     }
 
-    public function validateResponse(ResponseInterface $response, RequestDefinition $definition)
+    public function validateResponse(ResponseInterface $response, RequestDefinition $definition): void
     {
         $responseDefinition = $definition->getResponseDefinition($response->getStatusCode());
         if ($responseDefinition->hasBodySchema()) {
@@ -58,7 +62,7 @@ class MessageValidator
         $this->validateHeaders($response, $responseDefinition);
     }
 
-    public function validateMessageBody(MessageInterface $message, MessageDefinition $definition)
+    public function validateMessageBody(MessageInterface $message, MessageDefinition $definition): void
     {
         if ($message instanceof ServerRequestInterface) {
             $bodyString = json_encode((array) $message->getParsedBody());
@@ -76,7 +80,7 @@ class MessageValidator
         }
     }
 
-    public function validateHeaders(MessageInterface $message, MessageDefinition $definition)
+    public function validateHeaders(MessageInterface $message, MessageDefinition $definition): void
     {
         if ($definition->hasHeadersSchema()) {
             // Transform each header values into a string
@@ -97,13 +101,8 @@ class MessageValidator
 
     /**
      * Validate an HTTP message content-type against a message definition
-     *
-     * @param MessageInterface $message
-     * @param MessageDefinition $definition
-     *
-     * @return bool When the content-type is valid
      */
-    public function validateContentType(MessageInterface $message, MessageDefinition $definition)
+    public function validateContentType(MessageInterface $message, MessageDefinition $definition): bool
     {
         $contentType = $message->getHeaderLine('Content-Type');
         $contentTypes = $definition->getContentTypes();
@@ -115,7 +114,7 @@ class MessageValidator
             } else {
                 $violationMessage = sprintf(
                     '%s is not a supported content type, supported: %s',
-                    $message->getHeaderLine('Content-Type'),
+                    $contentType,
                     implode(', ', $contentTypes)
                 );
                 $constraint = 'enum';
@@ -136,7 +135,7 @@ class MessageValidator
         return true;
     }
 
-    public function validatePath(RequestInterface $request, RequestDefinition $definition)
+    public function validatePath(RequestInterface $request, RequestDefinition $definition): void
     {
         if ($definition->hasPathSchema()) {
             $template = new UriTemplate();
@@ -151,7 +150,7 @@ class MessageValidator
         }
     }
 
-    public function validateQueryParameters(RequestInterface $request, RequestDefinition $definition)
+    public function validateQueryParameters(RequestInterface $request, RequestDefinition $definition): void
     {
         if ($definition->hasQueryParametersSchema()) {
             parse_str($request->getUri()->getQuery(), $queryParams);
@@ -166,10 +165,7 @@ class MessageValidator
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function hasViolations()
+    public function hasViolations(): bool
     {
         return !empty($this->violations);
     }
@@ -177,22 +173,20 @@ class MessageValidator
     /**
      * @return ConstraintViolation[]
      */
-    public function getViolations()
+    public function getViolations(): array
     {
         return $this->violations;
     }
 
     /**
      * @param mixed $data
-     * @param \stdClass $schema
-     * @param string $location (possible values: query, path, body, headers)
      */
-    protected function validate($data, $schema, $location)
+    protected function validate($data, stdClass $schema, string $location): void
     {
         $this->validator->coerce($data, $schema);
         if (! $this->validator->isValid()) {
             $violations = array_map(
-                function ($error) use ($location) {
+                function (array $error) use ($location) {
                     return new ConstraintViolation(
                         $error['property'],
                         $error['message'],

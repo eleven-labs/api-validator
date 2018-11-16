@@ -8,9 +8,7 @@ interface SchemaFactory
     /**
      * Create a Schema definition from an API definition
      *
-     * @param string $schemaFile Path to your API definition
-     *
-     * @return Schema
+     * Schema file must start with a scheme: file:// or http:// or https://
      */
-    public function createSchema($schemaFile);
+    public function createSchema(string $schemaFile): Schema;
 }

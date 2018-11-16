@@ -1,12 +1,11 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Definition;
 
 class RequestDefinitions implements \Serializable, \IteratorAggregate
 {
-    /**
-     * @var array
-     */
-    private $definitions;
+    /** @var RequestDefinition[] */
+    private $definitions = [];
 
     public function __construct(array $requestDefinitions = [])
     {
@@ -16,32 +15,26 @@ class RequestDefinitions implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * @param string $operationId
-     *
-     * @return RequestDefinition
+     * @throws \InvalidArgumentException If no request defintion for the operation exists.
      */
-    public function getRequestDefinition($operationId)
+    public function getRequestDefinition(string $operationId): RequestDefinition
     {
-        if (!isset($this->definitions[$operationId])) {
-            throw new \InvalidArgumentException('Unable to find request definition for operationId '.$operationId);
+        if (isset($this->definitions[$operationId])) {
+            return $this->definitions[$operationId];
         }
 
-        return $this->definitions[$operationId];
+        throw new \InvalidArgumentException('Unable to find request definition for operationId ' . $operationId);
     }
 
-    private function addRequestDefinition(RequestDefinition $requestDefinition)
+    // IteratorAggregate
+    public function getIterator(): iterable
     {
-        $this->definitions[$requestDefinition->getOperationId()] = $requestDefinition;
+        foreach ($this->definitions as $operationId => $requestDefinition) {
+            yield $operationId => $requestDefinition;
+        }
     }
 
-    /**
-     * @return \ArrayIterator|RequestDefinition[]
-     */
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->definitions);
-    }
-
+    // Serializable
     public function serialize()
     {
         return serialize([
@@ -49,9 +42,15 @@ class RequestDefinitions implements \Serializable, \IteratorAggregate
         ]);
     }
 
+    // Serializable
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
         $this->definitions = $data['definitions'];
+    }
+
+    private function addRequestDefinition(RequestDefinition $requestDefinition): void
+    {
+        $this->definitions[$requestDefinition->getOperationId()] = $requestDefinition;
     }
 }

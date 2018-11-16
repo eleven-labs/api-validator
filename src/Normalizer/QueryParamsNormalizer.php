@@ -1,5 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Normalizer;
+
+use stdClass;
 
 class QueryParamsNormalizer
 {
@@ -7,11 +10,11 @@ class QueryParamsNormalizer
      * Normalize parameters
      *
      * @param array $queryParams An array of query parameters
-     * @param \stdClass $queryParamsSchema A JSON Schema of query params
+     * @param stdClass $queryParamsSchema A JSON Schema of query params
      *
      * @return array An array of query parameters with the proper types
      */
-    public static function normalize(array $queryParams, \stdClass $queryParamsSchema)
+    public static function normalize(array $queryParams, stdClass $queryParamsSchema): array
     {
         foreach ($queryParamsSchema->properties as $name => $queryParamSchema) {
             $type = isset($queryParamSchema->type)

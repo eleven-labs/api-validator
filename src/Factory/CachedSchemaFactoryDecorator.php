@@ -1,6 +1,7 @@
 <?php
 namespace ElevenLabs\Api\Factory;
 
+use ElevenLabs\Api\Schema;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -20,7 +21,7 @@ class CachedSchemaFactoryDecorator implements SchemaFactory
         $this->schemaFactory = $schemaFactory;
     }
 
-    public function createSchema($schemaFile)
+    public function createSchema(string $schemaFile): Schema
     {
         $cacheKey = hash('sha1', $schemaFile);
         $item = $this->cache->getItem($cacheKey);

@@ -1,5 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Definition;
+
+use stdClass;
 
 class Parameter implements \Serializable
 {
@@ -7,76 +10,64 @@ class Parameter implements \Serializable
     const BODY_LOCATIONS = ['formData', 'body'];
     const BODY_LOCATIONS_TYPES = ['formData' => 'application/x-www-form-urlencoded', 'body'  => 'application/json'];
 
-    /**
-     * Location of the parameter in the request
-     *
-     * @var string
-     */
+    /** @var string */
     private $location;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
 
-    /**
-     * Indicate if the parameter should be present
-     *
-     * @var bool
-     */
+    /** @var bool */
     private $required;
 
-    /**
-     * A JSON Schema object
-     *
-     * @var \stdClass
-     */
+    /** @var ?stdClass */
     private $schema;
 
-    public function __construct($location, $name, $required, \stdClass $schema = null)
-    {
+    /**
+     * @throws \InvalidArgumentException If the location is not supported.
+     */
+    public function __construct(
+        string $location,
+        string $name,
+        bool $required = false,
+        ?stdClass $schema = null
+    ) {
+        if (! in_array($location, self::LOCATIONS, true)) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    '%s is not a supported parameter location, supported: %s',
+                    $location,
+                    implode(', ', self::LOCATIONS)
+                )
+            );
+        }
+
         $this->location = $location;
         $this->name = $name;
         $this->required = $required;
         $this->schema = $schema;
     }
 
-    /**
-     * @return string
-     */
-    public function getLocation()
+    public function getLocation(): string
     {
         return $this->location;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return boolean
-     */
-    public function isRequired()
+    public function isRequired(): bool
     {
         return $this->required;
     }
 
-    /**
-     * @return \stdClass
-     */
-    public function getSchema()
+    public function getSchema(): ?stdClass
     {
         return $this->schema;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasSchema()
+    public function hasSchema(): bool
     {
         return $this->schema !== null;
     }

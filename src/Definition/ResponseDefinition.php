@@ -1,21 +1,23 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Definition;
+
+use stdClass;
 
 class ResponseDefinition implements \Serializable, MessageDefinition
 {
-    /** @var int */
+    /** @var int|string */
     private $statusCode;
 
-    /** @var array */
+    /** @var string[] */
     private $contentTypes;
 
     /** @var Parameters */
     private $parameters;
 
     /**
-     * @param int $statusCode
-     * @param array $allowedContentTypes
-     * @param Parameters $parameters
+     * @param int|string $statusCode
+     * @param string[] $allowedContentTypes
      */
     public function __construct($statusCode, array $allowedContentTypes, Parameters $parameters)
     {
@@ -25,48 +27,44 @@ class ResponseDefinition implements \Serializable, MessageDefinition
     }
 
     /**
-     * @return int
+     * @return int|string
      */
     public function getStatusCode()
     {
         return $this->statusCode;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasBodySchema()
+    public function hasBodySchema(): bool
     {
         return $this->parameters->hasBodySchema();
     }
 
-    /**
-     * @return \stdClass
-     */
-    public function getBodySchema()
+    public function getBodySchema(): ?stdClass
     {
         return $this->parameters->getBodySchema();
     }
 
-    public function hasHeadersSchema()
+    public function hasHeadersSchema(): bool
     {
         return $this->parameters->hasHeadersSchema();
     }
 
-    public function getHeadersSchema()
+    public function getHeadersSchema(): ?stdClass
     {
         return $this->parameters->getHeadersSchema();
     }
 
     /**
-     * Supported response types
-     * @return array
+     * Supported response types.
+     *
+     * @return string[]
      */
-    public function getContentTypes()
+    public function getContentTypes(): array
     {
         return $this->contentTypes;
     }
 
+    // Serializable
     public function serialize()
     {
         return serialize([
@@ -76,6 +74,7 @@ class ResponseDefinition implements \Serializable, MessageDefinition
         ]);
     }
 
+    // Serializable
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
