@@ -18,34 +18,19 @@ use Symfony\Component\Yaml\Yaml;
  */
 class SwaggerSchemaFactory implements SchemaFactory
 {
-    /**
-     * @param string $schemaFile (must start with a scheme: file://, http:// or https://)
-     *
-     * @return Schema
-     */
-    public function createSchema($schemaFile)
+    public function createSchema(string $schemaFile): Schema
     {
         $schema = $this->resolveSchemaFile($schemaFile);
 
-        $host = isset($schema->host) ? $schema->host : null;
-        $basePath = isset($schema->basePath) ? $schema->basePath : '';
-        $schemes = isset($schema->schemes) ? $schema->schemes : ['http'];
-
         return new Schema(
             $this->createRequestDefinitions($schema),
-            $basePath,
-            $host,
-            $schemes
+            $schema->basePath ?? '',
+            $schema->host ?? '',
+            $schema->schemes ?? ['http']
         );
     }
 
-    /**
-     *
-     * @param string $schemaFile
-     *
-     * @return object
-     */
-    protected function resolveSchemaFile($schemaFile)
+    protected function resolveSchemaFile($schemaFile): object
     {
         $extension = pathinfo($schemaFile, PATHINFO_EXTENSION);
         switch ($extension) {
@@ -88,7 +73,7 @@ class SwaggerSchemaFactory implements SchemaFactory
         return $schema;
     }
 
-    private function expandSchemaReferences(&$schema, SchemaStorage $schemaStorage)
+    private function expandSchemaReferences(&$schema, SchemaStorage $schemaStorage): void
     {
         foreach ($schema as &$member) {
             if (is_object($member) && property_exists($member, '$ref') && is_string($member->{'$ref'})) {
@@ -100,11 +85,7 @@ class SwaggerSchemaFactory implements SchemaFactory
         }
     }
 
-    /**
-     * @param \stdClass $schema
-     * @return RequestDefinitions
-     */
-    protected function createRequestDefinitions(\stdClass $schema)
+    protected function createRequestDefinitions(object $schema): RequestDefinitions
     {
         $definitions = [];
         $defaultConsumedContentTypes = [];
@@ -188,10 +169,7 @@ class SwaggerSchemaFactory implements SchemaFactory
         return new RequestDefinitions($definitions);
     }
 
-    /**
-     * @return bool
-     */
-    private function containsBodyParametersLocations(\stdClass $definition)
+    private function containsBodyParametersLocations(object $definition): bool
     {
         if (!isset($definition->parameters)) {
             return false;
@@ -207,12 +185,9 @@ class SwaggerSchemaFactory implements SchemaFactory
     }
 
     /**
-     * @param \stdClass $definition
-     * @param string $pathTemplate
-     *
-     * @return array
+     * @return string[]
      */
-    private function guessSupportedContentTypes(\stdClass $definition, $pathTemplate)
+    private function guessSupportedContentTypes(object $definition, string $pathTemplate): array
     {
         if (!isset($definition->parameters)) {
             return [];
@@ -242,9 +217,12 @@ class SwaggerSchemaFactory implements SchemaFactory
         return [];
     }
 
-    protected function createResponseDefinition($statusCode, array $defaultProducedContentTypes, \stdClass $response)
+    /**
+     * @param string|int $statusCode
+     * @param string[] $allowedContentTypes
+     */
+    protected function createResponseDefinition($statusCode, array $allowedContentTypes, object $response): ResponseDefinition
     {
-        $allowedContentTypes = $defaultProducedContentTypes;
         $parameters = [];
         if (isset($response->schema)) {
             $parameters[] = $this->createParameter((object) [
@@ -267,14 +245,7 @@ class SwaggerSchemaFactory implements SchemaFactory
         return new ResponseDefinition($statusCode, $allowedContentTypes, new Parameters($parameters));
     }
 
-    /**
-     * Create a Parameter from a swagger parameter
-     *
-     * @param \stdClass $parameter
-     *
-     * @return Parameter
-     */
-    protected function createParameter(\stdClass $parameter)
+    protected function createParameter(object $parameter): Parameter
     {
         $parameter = get_object_vars($parameter);
         $location = $parameter['in'];

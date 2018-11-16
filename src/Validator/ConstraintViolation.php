@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Validator;
 
 /**
@@ -24,47 +25,39 @@ class ConstraintViolation
      * @param string $constraint
      * @param string $location
      */
-    public function __construct($property, $message, $constraint, $location)
-    {
+    public function __construct(
+        string $property,
+        string $message,
+        string $constraint,
+        string $location
+    ) {
         $this->property = $property;
         $this->message = $message;
         $this->constraint = $constraint;
         $this->location = $location;
     }
 
-    /**
-     * @return string
-     */
-    public function getProperty()
+    public function getProperty(): string
     {
         return $this->property;
     }
 
-    /**
-     * @return string
-     */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    /**
-     * @return string
-     */
-    public function getConstraint()
+    public function getConstraint(): string
     {
         return $this->constraint;
     }
 
-    /**
-     * @return string
-     */
-    public function getLocation()
+    public function getLocation(): string
     {
         return $this->location;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'property' => $this->getProperty(),

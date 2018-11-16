@@ -8,16 +8,10 @@ cache:
 
 matrix:
   include:
-  - php: 5.6
-    env: SYMFONY_VERSION='^2'
-  - php: 5.6
-    env: SYMFONY_VERSION='^3'
-  - php: 7.0
-    env: SYMFONY_VERSION='^3'
-  - php: 7.1
-    env: SYMFONY_VERSION='^3' PHPUNIT_ARGS='--testdox'
   - php: 7.2
     env: SYMFONY_VERSION='^3' PHPUNIT_ARGS='--testdox'
+  - php: 7.3
+    env: SYMFONY_VERSION='^4' PHPUNIT_ARGS='--testdox'
   - php: 7.2
     env: SYMFONY_VERSION='^4' COVERAGE='' PHPCS='' PHPSTAN='' PHPUNIT_ARGS='--testdox --coverage-text --coverage-clover=build/phpunit.coverage.xml'
 

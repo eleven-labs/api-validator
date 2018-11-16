@@ -15,14 +15,13 @@ class SchemaTest extends TestCase
         $request->getPathTemplate()->willReturn('/api/pets/{id}');
         $request->getOperationId()->willReturn('getPet');
 
-        $requests = $this->prophesize(RequestDefinitions::class);
-        $requests->getIterator()->willReturn(new \ArrayIterator([$request->reveal()]));
+        $requests = new RequestDefinitions([$request->reveal()]);
 
-        $schema = new Schema($requests->reveal());
+        $schema = new Schema($requests);
 
         $operations = $schema->getRequestDefinitions();
 
-        assertTrue($operations instanceof \Generator);
+        assertTrue(is_iterable($operations));
 
         foreach ($operations as $operationId => $operation) {
             assertThat($operationId, equalTo('getPet'));
@@ -53,10 +52,9 @@ class SchemaTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unable to resolve the operationId for path /api/pets/1234');
 
-        $requests = $this->prophesize(RequestDefinitions::class);
-        $requests->getIterator()->willReturn(new \ArrayIterator());
+        $requests = new RequestDefinitions();
 
-        $schema = new Schema($requests->reveal(), '/api');
+        $schema = new Schema($requests, '/api');
         $schema->findOperationId('GET', '/api/pets/1234');
     }
 
@@ -68,10 +66,9 @@ class SchemaTest extends TestCase
         $request->getPathTemplate()->willReturn('/pets/{id}');
         $request->getOperationId()->willReturn('getPet');
 
-        $requests = $this->prophesize(RequestDefinitions::class);
-        $requests->getIterator()->willReturn(new \ArrayIterator([$request->reveal()]));
+        $requests = new RequestDefinitions([$request->reveal()]);
 
-        $schema = new Schema($requests->reveal(), '/api');
+        $schema = new Schema($requests, '/api');
         $actual = $schema->getRequestDefinition('getPet');
 
         assertThat($actual, equalTo($request->reveal()));
@@ -81,22 +78,20 @@ class SchemaTest extends TestCase
     public function itThrowAnExceptionWhenNoRequestDefinitionIsFound()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to get the request definition for getPet');
+        $this->expectExceptionMessage('Unable to find request definition for operationId getPet');
 
-        $requests = $this->prophesize(RequestDefinitions::class);
-        $requests->getIterator()->willReturn(new \ArrayIterator());
+        $requests = new RequestDefinitions();
 
-        $schema = new Schema($requests->reveal(), '/api');
+        $schema = new Schema($requests, '/api');
         $schema->getRequestDefinition('getPet');
     }
 
     /** @test */
     public function itCanBeSerialized()
     {
-        $requests = $this->prophesize(RequestDefinitions::class);
-        $requests->getIterator()->willReturn(new \ArrayIterator());
+        $requests = new RequestDefinitions();
 
-        $schema = new Schema($requests->reveal());
+        $schema = new Schema($requests);
         $serialized = serialize($schema);
 
         assertThat(unserialize($serialized), equalTo($schema));

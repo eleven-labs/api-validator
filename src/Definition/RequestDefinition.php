@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace ElevenLabs\Api\Definition;
 
 class RequestDefinition implements \Serializable, MessageDefinition
@@ -15,22 +16,24 @@ class RequestDefinition implements \Serializable, MessageDefinition
     /** @var Parameters */
     private $parameters;
 
-    /** @var array */
+    /** @var string[] */
     private $contentTypes;
 
     /** @var ResponseDefinition[] */
     private $responses;
 
     /**
-     * @param string $method
-     * @param string $operationId
-     * @param string $pathTemplate
-     * @param Parameters $parameters
-     * @param array $contentTypes
+     * @param string[] $contentTypes
      * @param ResponseDefinition[] $responses
      */
-    public function __construct($method, $operationId, $pathTemplate, Parameters $parameters, array $contentTypes, array $responses)
-    {
+    public function __construct(
+        string $method,
+        string $operationId,
+        string $pathTemplate,
+        Parameters $parameters,
+        array $contentTypes,
+        array $responses
+    ) {
         $this->method = $method;
         $this->operationId = $operationId;
         $this->pathTemplate = $pathTemplate;
@@ -41,115 +44,92 @@ class RequestDefinition implements \Serializable, MessageDefinition
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
 
-    /**
-     * @return string
-     */
-    public function getOperationId()
+    public function getOperationId(): string
     {
         return $this->operationId;
     }
 
-    /**
-     * @return string
-     */
-    public function getPathTemplate()
+    public function getPathTemplate(): string
     {
         return $this->pathTemplate;
     }
 
-    /**
-     * @return Parameters
-     */
-    public function getRequestParameters()
+    public function getRequestParameters(): Parameters
     {
         return $this->parameters;
     }
 
-    /**
-     * Supported content types
-     *
-     * @return array
-     */
-    public function getContentTypes()
+    public function getContentTypes(): array
     {
         return $this->contentTypes;
     }
 
-    /**
-     * @param $statusCode
-     * @return ResponseDefinition
-     */
-    public function getResponseDefinition($statusCode)
+    public function getResponseDefinition(int $statusCode): ResponseDefinition
     {
         if (isset($this->responses[$statusCode])) {
             return $this->responses[$statusCode];
-        } else if (isset($this->responses['default'])) {
-            return $this->responses['default'];
-        } else {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'No response definition for %s %s is available for status code %s',
-                    $this->method,
-                    $this->pathTemplate,
-                    $statusCode
-                )
-            );
         }
+
+        if (isset($this->responses['default'])) {
+            return $this->responses['default'];
+        }
+
+        throw new \InvalidArgumentException(
+            sprintf(
+                'No response definition for %s %s is available for status code %s',
+                $this->method,
+                $this->pathTemplate,
+                $statusCode
+            )
+        );
     }
 
-    public function hasBodySchema()
+    public function hasBodySchema(): bool
     {
         return $this->parameters->hasBodySchema();
     }
 
-    public function getBodySchema()
+    public function getBodySchema(): ?object
     {
         return $this->parameters->getBodySchema();
     }
 
-    public function hasHeadersSchema()
+    public function hasHeadersSchema(): bool
     {
         return $this->parameters->hasHeadersSchema();
     }
 
-    public function getHeadersSchema()
+    public function getHeadersSchema(): ?object
     {
         return $this->parameters->getHeadersSchema();
     }
 
-    public function hasPathSchema()
+    public function hasPathSchema(): bool
     {
         return $this->parameters->hasPathSchema();
     }
 
-    public function getPathSchema()
+    public function getPathSchema(): ?object
     {
         return $this->parameters->getPathSchema();
     }
 
-    public function hasQueryParametersSchema()
+    public function hasQueryParametersSchema(): bool
     {
         return $this->parameters->hasQueryParametersSchema();
     }
 
-    public function getQueryParametersSchema()
+    public function getQueryParametersSchema(): ?object
     {
         return $this->parameters->getQueryParametersSchema();
     }
 
-    private function addResponseDefinition(ResponseDefinition $response)
-    {
-        $this->responses[$response->getStatusCode()] = $response;
-    }
-
+    // Serializable
     public function serialize()
     {
         return serialize([
@@ -162,6 +142,7 @@ class RequestDefinition implements \Serializable, MessageDefinition
         ]);
     }
 
+    // Serializable
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
@@ -171,5 +152,10 @@ class RequestDefinition implements \Serializable, MessageDefinition
         $this->parameters = $data['parameters'];
         $this->contentTypes = $data['contentTypes'];
         $this->responses = $data['responses'];
+    }
+
+    private function addResponseDefinition(ResponseDefinition $response)
+    {
+        $this->responses[$response->getStatusCode()] = $response;
     }
 }
