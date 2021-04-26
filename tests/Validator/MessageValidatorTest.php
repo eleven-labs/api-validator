@@ -7,6 +7,7 @@ use ElevenLabs\Api\Definition\RequestDefinition;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use JsonSchema\Validator;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -23,6 +24,8 @@ use function PHPUnit\Framework\isTrue;
  */
 class MessageValidatorTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @var MessageValidator */
     private $messageValidator;
 

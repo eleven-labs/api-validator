@@ -4,6 +4,7 @@ namespace ElevenLabs\Api\Factory;
 use ElevenLabs\Api\Schema;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use function PHPUnit\Framework\assertThat;
@@ -12,6 +13,8 @@ use function PHPUnit\Framework\isInstanceOf;
 
 class CachedSchemaFactoryDecoratorTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @test */
     public function itShouldSaveASchemaInACacheStore()
     {
