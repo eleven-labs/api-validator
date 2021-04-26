@@ -2,6 +2,7 @@
 namespace ElevenLabs\Api\Definition;
 
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertThat;
 
 class RequestParameterTest extends TestCase
 {

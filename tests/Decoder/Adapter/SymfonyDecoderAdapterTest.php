@@ -4,6 +4,8 @@ namespace ElevenLabs\Api\Decoder\Adapter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\equalTo;
 
 class SymfonyDecoderAdapterTest extends TestCase
 {

@@ -4,6 +4,9 @@ namespace ElevenLabs\Api;
 use ElevenLabs\Api\Definition\RequestDefinition;
 use ElevenLabs\Api\Definition\RequestDefinitions;
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\assertTrue;
+use function PHPUnit\Framework\equalTo;
 
 class SchemaTest extends TestCase
 {

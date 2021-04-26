@@ -7,6 +7,14 @@ use ElevenLabs\Api\Definition\Parameters;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use ElevenLabs\Api\Schema;
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertContains;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\containsOnlyInstancesOf;
+use function PHPUnit\Framework\equalTo;
+use function PHPUnit\Framework\isFalse;
+use function PHPUnit\Framework\isInstanceOf;
+use function PHPUnit\Framework\isTrue;
+use function PHPUnit\Framework\isType;
 
 class SwaggerSchemaFactoryTest extends TestCase
 {
@@ -32,7 +40,7 @@ class SwaggerSchemaFactoryTest extends TestCase
         $unsupportedFile = 'file://'.dirname(__DIR__).'/fixtures/petstore.txt';
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/does not provide a supported extension/');
+        $this->expectExceptionMessageMatches('/does not provide a supported extension/');
 
         (new SwaggerSchemaFactory())->createSchema($unsupportedFile);
     }
@@ -149,7 +157,7 @@ class SwaggerSchemaFactoryTest extends TestCase
         assertThat($responseDefinition, isInstanceOf(ResponseDefinition::class));
         assertThat($responseDefinition->getBodySchema(), isType('object'));
         assertThat($responseDefinition->getStatusCode(), equalTo(200));
-        assertThat($responseDefinition->getContentTypes(), contains('application/json'));
+        assertContains('application/json', $responseDefinition->getContentTypes());
     }
 
     public function itUseTheSchemaDefaultConsumesPropertyWhenNotProvidedByAnOperation()
@@ -157,7 +165,7 @@ class SwaggerSchemaFactoryTest extends TestCase
         $schema = $this->getSchemaFromFile('schema-with-default-consumes-and-produces-properties.json');
         $definition = $schema->getRequestDefinition('postSomething');
 
-        assertThat($definition->getContentTypes(), contains('application/json'));
+        assertContains('application/json', $definition->getContentTypes());
     }
 
     /** @test */
@@ -168,7 +176,7 @@ class SwaggerSchemaFactoryTest extends TestCase
             ->getRequestDefinition('postSomething')
             ->getResponseDefinition(201);
 
-        assertThat($responseDefinition->getContentTypes(), contains('application/json'));
+        assertContains('application/json', $responseDefinition->getContentTypes());
     }
 
     /**
@@ -181,7 +189,7 @@ class SwaggerSchemaFactoryTest extends TestCase
 
         $definition = $schema->getRequestDefinition($operationId);
 
-        assertThat($definition->getContentTypes(), contains($expectedContentType));
+        assertContains($expectedContentType, $definition->getContentTypes());
     }
 
     public function getGuessableContentTypes()
