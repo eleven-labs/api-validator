@@ -8,11 +8,11 @@ cache:
 
 matrix:
   include:
-  - php: 7.2
+  - php: 7.4
     env: SYMFONY_VERSION='^3' PHPUNIT_ARGS='--testdox'
-  - php: 7.3
+  - php: 7.4
     env: SYMFONY_VERSION='^4' PHPUNIT_ARGS='--testdox'
-  - php: 7.2
+  - php: 7.4
     env: SYMFONY_VERSION='^4' COVERAGE='' PHPCS='' PHPSTAN='' PHPUNIT_ARGS='--testdox --coverage-text --coverage-clover=build/phpunit.coverage.xml'
 
 before_install:
