@@ -8,7 +8,7 @@ version() {
 
 phpstan_download() {
     if [ ! -f "phpstan.phar" ];then
-        curl -sOL https://github.com/phpstan/phpstan/releases/download/0.10.5/phpstan.phar
+        curl -sOL https://github.com/phpstan/phpstan/releases/download/0.12.84/phpstan.phar
     fi
 }
 
