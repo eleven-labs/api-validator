@@ -5,7 +5,7 @@ tools:
 build:
   environment:
     php:
-      version: 7.4
+      version: 8.0
   nodes:
     analysis:
       tests:
