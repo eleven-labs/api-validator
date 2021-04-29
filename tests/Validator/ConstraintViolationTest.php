@@ -2,6 +2,7 @@
 namespace ElevenLabs\Api\Validator;
 
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertEquals;
 
 class ConstraintViolationTest extends TestCase
 {

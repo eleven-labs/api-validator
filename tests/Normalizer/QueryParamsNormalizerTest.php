@@ -2,6 +2,8 @@
 namespace ElevenLabs\Api\Normalizer;
 
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\equalTo;
 
 class QueryParamsNormalizerTest extends TestCase
 {

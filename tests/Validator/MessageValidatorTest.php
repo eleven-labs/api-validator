@@ -7,21 +7,29 @@ use ElevenLabs\Api\Definition\RequestDefinition;
 use ElevenLabs\Api\Definition\ResponseDefinition;
 use JsonSchema\Validator;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\containsOnlyInstancesOf;
+use function PHPUnit\Framework\equalTo;
+use function PHPUnit\Framework\isFalse;
+use function PHPUnit\Framework\isTrue;
 
 /**
  * Class RequestValidatorTest
  */
 class MessageValidatorTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @var MessageValidator */
     private $messageValidator;
 
-    public function setUp()
+    public function setUp(): void
     {
         $validator = new Validator();
         $decoder = new SymfonyDecoderAdapter(new JsonDecode());

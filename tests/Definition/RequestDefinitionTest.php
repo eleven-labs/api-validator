@@ -2,9 +2,13 @@
 namespace ElevenLabs\Api\Definition;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
+use function PHPUnit\Framework\assertThat;
 
 class RequestDefinitionTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @test */
     public function itCanBeSerialized()
     {

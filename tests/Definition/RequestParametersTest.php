@@ -2,9 +2,16 @@
 namespace ElevenLabs\Api\Definition;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\containsOnlyInstancesOf;
+use function PHPUnit\Framework\equalTo;
+use function PHPUnit\Framework\isInstanceOf;
 
 class RequestParametersTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @test */
     public function itCanBeTraversed()
     {

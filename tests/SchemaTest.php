@@ -4,9 +4,15 @@ namespace ElevenLabs\Api;
 use ElevenLabs\Api\Definition\RequestDefinition;
 use ElevenLabs\Api\Definition\RequestDefinitions;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\assertTrue;
+use function PHPUnit\Framework\equalTo;
 
 class SchemaTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @test */
     public function itCanIterateAvailableOperations()
     {

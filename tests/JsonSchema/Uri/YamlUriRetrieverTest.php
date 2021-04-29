@@ -2,6 +2,8 @@
 namespace ElevenLabs\Api\JsonSchema\Uri;
 
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertThat;
+use function PHPUnit\Framework\isType;
 
 class YamlUriRetrieverTest extends TestCase
 {
